@@ -5,10 +5,15 @@ import { TrendingUp, TrendingDown, AlertTriangle, ShieldCheck } from 'lucide-rea
 export const HarvestScreen = () => {
   const { state, dispatch } = useGame();
   
-  // FAILSAFE: If no stats exist (bug), default to zeros to prevent crash
   const stats = state.lastHarvestStats || {
       grossIncome: 0, totalExpenses: 0, netProfit: 0, yieldPercentage: 0, insurancePayout: 0
   };
+
+  const totalDebt = state.debt;
+  const cashOnHand = state.savings; 
+  
+  const canPayFull = cashOnHand >= totalDebt;
+  const minPayment = Math.floor(totalDebt * 0.1); 
 
   const isProfit = stats.netProfit >= 0;
 
@@ -31,7 +36,6 @@ export const HarvestScreen = () => {
                 </div>
             </div>
 
-            {/* Detailed Breakdown */}
             <div className="space-y-3 border-t pt-4">
                 <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Crop Sales Income</span>
@@ -64,25 +68,46 @@ export const HarvestScreen = () => {
             </div>
         </div>
 
-        {/* 3. Poverty Warning (Logic Check) */}
-        {state.isPovertySpiral && (
-             <div className="w-full bg-red-100 border-l-4 border-red-500 p-4 rounded mb-6 flex items-start gap-3">
-                <AlertTriangle className="text-red-600 w-6 h-6 flex-shrink-0" />
-                <div>
-                    <h3 className="font-bold text-red-800">Debt Trap Warning</h3>
-                    <p className="text-xs text-red-700 mt-1">
-                        Your debt is growing faster than your income. You need to cut costs or increase yield immediately.
-                    </p>
+        {/* 3. Debt Management - Only shows if there is debt */}
+        {totalDebt > 0 ? (
+            <div className="w-full bg-red-50 p-4 rounded-xl border border-red-200 mb-6">
+                <h3 className="font-bold text-red-800 mb-2">Outstanding Debt: ₹{totalDebt.toLocaleString()}</h3>
+                <p className="text-xs text-red-600 mb-4">Repayment affects your Credit Score.</p>
+
+                <div className="space-y-2">
+                    <button 
+                        disabled={!canPayFull}
+                        onClick={() => dispatch({ type: 'REPAY_LOAN', payload: { amount: totalDebt, type: 'FULL' } })}
+                        className={`w-full p-3 rounded-lg font-bold text-sm flex justify-between ${canPayFull ? 'bg-green-600 text-white shadow-md' : 'bg-gray-300 text-gray-500'}`}
+                    >
+                        <span>Pay Full Amount</span>
+                        <span className="text-xs opacity-80">(+50 Score)</span>
+                    </button>
+
+                    <button 
+                         onClick={() => dispatch({ type: 'REPAY_LOAN', payload: { amount: minPayment, type: 'PARTIAL' } })}
+                         className="w-full bg-white border border-yellow-500 text-yellow-700 p-3 rounded-lg font-bold text-sm flex justify-between hover:bg-yellow-50"
+                    >
+                        <span>Pay Interest Only (₹{minPayment})</span>
+                        <span className="text-xs opacity-80">(-10 Score)</span>
+                    </button>
+                    
+                     <button 
+                         onClick={() => dispatch({ type: 'REPAY_LOAN', payload: { amount: 0, type: 'DEFAULT' } })}
+                         className="w-full text-red-500 p-2 text-xs hover:underline text-center"
+                    >
+                        Defer Payment (Risk Default)
+                    </button>
                 </div>
             </div>
+        ) : (
+             <button 
+                onClick={() => dispatch({ type: 'SHOW_RESILIENCE' })}
+                className="w-full bg-white border-2 border-game-primary text-game-primary hover:bg-green-50 py-4 rounded-xl font-bold shadow-sm transition-colors mt-auto"
+            >
+                Check Resilience Score
+            </button>
         )}
-
-        <button 
-            onClick={() => dispatch({ type: 'SHOW_RESILIENCE' })}
-            className="w-full bg-white border-2 border-game-primary text-game-primary hover:bg-green-50 py-4 rounded-xl font-bold shadow-sm transition-colors mt-auto"
-        >
-            Check Resilience Score
-        </button>
     </div>
   );
 };

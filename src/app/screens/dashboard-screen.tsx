@@ -1,33 +1,41 @@
 import React from 'react';
 import { useGame } from '../context/game-context';
-import { Sprout, User, FileText } from 'lucide-react';
+import { Sprout, User, FileText, ShoppingCart } from 'lucide-react';
+import { FarmVisualizer } from '../components/farm-visualizer';
 
 export const DashboardScreen = () => {
   const { state, dispatch } = useGame();
 
   return (
-    <div className="h-full flex flex-col bg-game-bg p-6 animate-fade-in relative">
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-                <span className="text-gray-500 font-medium">Season {state.seasonNumber} of {state.maxSeasons}</span>
-                <span className="text-gray-400 font-mono">{state.seasonNumber}/{state.maxSeasons}</span>
+    <div className="h-full flex flex-col bg-game-bg p-6 animate-fade-in relative overflow-y-auto">
+        {/* Visual Header */}
+        <div className="mb-6">
+             <FarmVisualizer state={state} />
+        </div>
+
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="bg-white rounded-xl shadow-sm p-4">
+                 <div className="text-gray-500 text-xs font-bold uppercase">Credit Score</div>
+                 <div className={`font-mono font-bold text-2xl ${state.creditScore >= 700 ? 'text-green-600' : state.creditScore < 600 ? 'text-red-600' : 'text-yellow-600'}`}>
+                     {state.creditScore}
+                 </div>
             </div>
-            <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-                <div 
-                    className="bg-game-primary h-full rounded-full transition-all duration-1000"
-                    style={{ width: `${(state.seasonNumber / state.maxSeasons) * 100}%` }}
-                ></div>
+            <div className="bg-white rounded-xl shadow-sm p-4">
+                 <div className="text-gray-500 text-xs font-bold uppercase">Season</div>
+                 <div className="font-mono font-bold text-2xl text-game-primary">
+                     {state.seasonNumber}/{state.maxSeasons}
+                 </div>
             </div>
         </div>
 
-        <div className="flex-grow flex flex-col items-center justify-center text-center opacity-80 py-10">
-            <div className="w-32 h-32 md:w-48 md:h-48 bg-green-200 rounded-full flex items-center justify-center mb-4 text-6xl md:text-8xl shadow-inner transition-transform hover:scale-110">
-                🌾
-            </div>
+        {/* Hero Text */}
+        <div className="flex-grow flex flex-col items-center justify-center text-center opacity-80 py-4">
             <h2 className="text-xl md:text-3xl font-bold text-gray-700">Ready to Plant?</h2>
             <p className="text-gray-500 md:text-lg">Prepare for the upcoming season</p>
         </div>
 
+        {/* Actions */}
         <div className="space-y-4 mb-20 md:mb-0 md:grid md:grid-cols-2 md:gap-6 md:space-y-0">
              <button 
                 onClick={() => dispatch({ type: 'START_SEASON' })}
@@ -36,6 +44,13 @@ export const DashboardScreen = () => {
                 <Sprout className="w-6 h-6" /> Start New Season
             </button>
             
+            <button 
+                onClick={() => dispatch({ type: 'GO_TO_SHOP' })}
+                className="w-full bg-white p-4 rounded-xl shadow-sm font-medium text-game-primary flex flex-col items-center gap-2 hover:bg-gray-50 transition border-2 border-transparent hover:border-game-primary"
+            >
+                <ShoppingCart className="w-6 h-6" /> Asset Store
+            </button>
+
             <button 
                 onClick={() => dispatch({ type: 'GO_TO_PROFILE' })}
                 className="w-full bg-white p-4 rounded-xl shadow-sm font-medium text-gray-600 flex flex-col items-center gap-2 hover:bg-gray-50 transition"

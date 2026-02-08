@@ -2,7 +2,6 @@ import React from 'react';
 import { GameProvider, useGame, GamePhase } from './app/context/game-context';
 import { LanguageProvider } from './app/context/language-context';
 
-// Import Screens
 import { LanguageScreen } from './app/screens/language-screen';
 import { FarmSetupScreen } from './app/screens/farm-setup-screen';
 import { DashboardScreen } from './app/screens/dashboard-screen';
@@ -13,6 +12,7 @@ import { ResilienceScreen } from './app/screens/resilience-screen';
 import { SummaryScreen } from './app/screens/summary-screen';
 import { ProfileScreen } from './app/screens/profile-screen';
 import { ReportsScreen } from './app/screens/reports-screen';
+import { ShopScreen } from './app/screens/shop-screen'; // NEW
 
 const ScreenRouter = () => {
   const { state } = useGame();
@@ -34,13 +34,11 @@ const ScreenRouter = () => {
     'DASHBOARD': <DashboardScreen />,
     'PROFILE': <ProfileScreen />,
     'REPORTS': <ReportsScreen />,
+    'SHOP': <ShopScreen />, // NEW
     'PLANNING': <SeasonPlanningScreen />,
-    
-    // FIX: Map all 3 new phases to the same EventScreen
     'EVENT_EARLY': <EventScreen />,
     'EVENT_MID': <EventScreen />,
     'EVENT_LATE': <EventScreen />,
-    
     'HARVEST': <HarvestScreen />,
     'RESILIENCE': <ResilienceScreen />,
     'GAME_OVER': <SummaryScreen />,
