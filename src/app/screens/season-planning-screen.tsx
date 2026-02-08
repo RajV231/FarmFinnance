@@ -3,15 +3,13 @@ import { useGame } from '../context/game-context';
 import { CROPS, LOANS, INSURANCES } from '../data/game-scenarios';
 import { Shield, Coins, Ruler } from 'lucide-react';
 import clsx from 'clsx';
+import { FarmVisualizer } from '../components/farm-visualizer'; // IMPORT
 
 export const SeasonPlanningScreen = () => {
   const { dispatch, state } = useGame();
   
-  // 1. FILTER LOGIC
   const availableCrops = useMemo(() => {
     if (state.farmType === 'MIXED') return CROPS;
-    // Filter based on the type ('CROP' or 'VEGETABLE')
-    // Note: Our state uses 'CROPS' string, data uses 'CROP'. Simple mapping:
     const targetType = state.farmType === 'CROPS' ? 'CROP' : 'VEGETABLE';
     return CROPS.filter(c => c.type === targetType);
   }, [state.farmType]);
@@ -22,7 +20,6 @@ export const SeasonPlanningScreen = () => {
   const [hasInsurance, setInsurance] = useState(false);
   const [savingsAlloc, setSavingsAlloc] = useState(Math.min(5000, state.savings));
 
-  // 2. ACREAGE CALCULATION FOR UI DISPLAY
   const getAcres = (size: string) => {
     if (size === '<2') return 1.5;
     if (size === '2-5') return 3.5;
@@ -34,12 +31,10 @@ export const SeasonPlanningScreen = () => {
   const selectedCrop = CROPS.find(c => c.id === cropId)!;
   const selectedLoan = loanId ? LOANS.find(l => l.id === loanId)! : LOANS[0];
 
-  // Calculate Real Costs for Display
   const totalSeedCost = selectedCrop.costPerAcre * acres;
   const insuranceCost = 1500 * acres;
 
   const handleConfirm = () => {
-    // Check if user has enough money
     const totalCost = totalSeedCost + (hasInsurance ? insuranceCost : 0);
     const available = savingsAlloc + (loanId ? loanAmount : 0);
     
@@ -62,8 +57,13 @@ export const SeasonPlanningScreen = () => {
 
   return (
     <div className="bg-game-bg min-h-full flex flex-col">
+        
+        {/* VISUALIZER AT TOP */}
+        <div className="p-4 pb-0">
+            <FarmVisualizer state={state} />
+        </div>
+
         <div className="flex-grow p-4 md:p-8 pb-24 md:pb-8 overflow-y-auto">
-            {/* Header with Farm Info */}
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h2 className="text-xl md:text-2xl font-bold text-game-primary">Season Planning</h2>
@@ -139,10 +139,7 @@ export const SeasonPlanningScreen = () => {
                    
                     <div className="space-y-3">
                         {LOANS.filter(l => l.maxAmount > 0).map(l => {
-                            // Scale Max Loan Limit by Acres for realism? 
-                            // Let's simpler: Boost max loan limit visually if farm is big
                             const realMaxAmount = l.maxAmount * (acres > 2 ? 2 : 1); 
-                            
                             return (
                                 <div key={l.id} className={clsx("rounded-lg border transition-all", loanId === l.id ? "border-game-primary bg-green-50 ring-1 ring-game-primary" : "border-gray-100")}>
                                     <button
@@ -203,8 +200,8 @@ export const SeasonPlanningScreen = () => {
                     </button>
                 </section>
 
-                {/* Total Cost Summary Block */}
-                <div className="md:col-span-2 bg-gray-50 p-4 rounded-xl flex justify-between items-center text-sm">
+                {/* Total Cost */}
+                <div className="md:col-span-2 bg-gray-50 p-4 rounded-xl flex justify-between items-center text-sm mb-10">
                     <span className="font-bold text-gray-600">Total Upfront Cost:</span>
                     <span className={clsx("font-bold text-lg", (savingsAlloc + (loanId ? loanAmount : 0)) < (totalSeedCost + (hasInsurance ? insuranceCost : 0)) ? "text-red-600" : "text-gray-800")}>
                         ₹{(totalSeedCost + (hasInsurance ? insuranceCost : 0)).toLocaleString()}

@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useGame } from '../context/game-context';
-import { CloudRain, AlertTriangle, TrendingDown, Bug, HeartPulse, Tractor, Clock } from 'lucide-react';
+import { CloudRain, AlertTriangle, TrendingDown, Bug, HeartPulse, Tractor } from 'lucide-react';
+import { FarmVisualizer } from '../components/farm-visualizer'; // IMPORT
 
 export const EventScreen = () => {
   const { state, dispatch } = useGame();
   
-  // Trigger event if missing (or when phase changes)
   useEffect(() => {
     if (!state.currentEvent) dispatch({ type: 'TRIGGER_EVENT' });
   }, [state.phase]);
@@ -27,7 +27,6 @@ export const EventScreen = () => {
       }
   };
 
-  // Timeline Indicator Logic
   const getPhaseIndex = () => {
       if (state.phase === 'EVENT_EARLY') return 1;
       if (state.phase === 'EVENT_MID') return 2;
@@ -37,61 +36,66 @@ export const EventScreen = () => {
   const phaseIdx = getPhaseIndex();
 
   return (
-    <div className={`h-full p-6 flex flex-col justify-center animate-fade-in ${isShock ? 'bg-red-50' : 'bg-game-bg'}`}>
+    <div className={`h-full flex flex-col bg-game-bg animate-fade-in overflow-y-auto`}>
       
-      {/* Timeline Visual */}
-      <div className="flex items-center justify-center gap-2 mb-6">
-        {[1, 2, 3].map(step => (
-             <div key={step} className={`h-2 w-16 rounded-full transition-colors ${step <= phaseIdx ? 'bg-game-primary' : 'bg-gray-200'}`} />
-        ))}
+      {/* 1. VISUALIZER AT THE TOP */}
+      <div className="p-4 pb-0">
+        <FarmVisualizer state={state} />
       </div>
-      <div className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">
-        Stage {phaseIdx} of 3
-      </div>
-      
-      {/* Event Card */}
-      <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-        <div className={`p-6 flex flex-col items-center text-center ${isShock ? 'bg-red-100' : 'bg-blue-50'}`}>
-             {getIcon()}
-             <h2 className="text-2xl font-bold mb-2">{evt.titleKey}</h2>
-             <p className="text-gray-600">{evt.descKey}</p>
+
+      <div className="p-6">
+        {/* Timeline Visual */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+            {[1, 2, 3].map(step => (
+                <div key={step} className={`h-2 w-16 rounded-full transition-colors ${step <= phaseIdx ? 'bg-game-primary' : 'bg-gray-200'}`} />
+            ))}
         </div>
-      </div>
-
-      {/* Choices */}
-      <div className="space-y-4">
-        <h3 className="text-center font-bold text-gray-700">What will you do?</h3>
+        <div className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">
+            Stage {phaseIdx} of 3
+        </div>
         
-        {/* Choice A: The "Safe/Mitigation" Choice */}
-        <button 
-            onClick={() => dispatch({ 
-                type: 'RESOLVE_EVENT_CHOICE', 
-                payload: { 
-                    cost: evt.choiceA.cost, 
-                    wellbeing: evt.choiceA.mitigatedWellbeing || 0 
-                } 
-            })}
-            className="w-full py-4 rounded-xl font-bold text-white shadow-md text-left px-6 flex justify-between bg-game-primary hover:bg-game-primaryDark transition-all active:scale-95"
-        >
-            <span>{evt.choiceA.label}</span>
-            <span className="opacity-90 bg-black/20 px-2 py-1 rounded text-sm">
-                -₹{evt.choiceA.cost}
-            </span>
-        </button>
+        {/* Event Card */}
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div className={`p-6 flex flex-col items-center text-center ${isShock ? 'bg-red-100' : 'bg-blue-50'}`}>
+                {getIcon()}
+                <h2 className="text-2xl font-bold mb-2">{evt.titleKey}</h2>
+                <p className="text-gray-600">{evt.descKey}</p>
+            </div>
+        </div>
 
-        {/* Choice B: The "Risky" Choice */}
-        <button 
-            onClick={() => dispatch({ 
-                type: 'RESOLVE_EVENT_CHOICE', 
-                payload: { cost: evt.choiceB.cost, wellbeing: 0 } 
-            })}
-            className="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold shadow-sm text-left px-6 flex justify-between hover:bg-gray-50 active:scale-95"
-        >
-             <span>{evt.choiceB.label}</span>
-             <span className="text-sm text-gray-400">
-                {evt.choiceB.cost > 0 ? `-₹${evt.choiceB.cost}` : 'Free'}
-             </span>
-        </button>
+        {/* Choices */}
+        <div className="space-y-4 pb-10">
+            <h3 className="text-center font-bold text-gray-700">What will you do?</h3>
+            
+            <button 
+                onClick={() => dispatch({ 
+                    type: 'RESOLVE_EVENT_CHOICE', 
+                    payload: { 
+                        cost: evt.choiceA.cost, 
+                        wellbeing: evt.choiceA.mitigatedWellbeing || 0 
+                    } 
+                })}
+                className="w-full py-4 rounded-xl font-bold text-white shadow-md text-left px-6 flex justify-between bg-game-primary hover:bg-game-primaryDark transition-all active:scale-95"
+            >
+                <span>{evt.choiceA.label}</span>
+                <span className="opacity-90 bg-black/20 px-2 py-1 rounded text-sm">
+                    -₹{evt.choiceA.cost}
+                </span>
+            </button>
+
+            <button 
+                onClick={() => dispatch({ 
+                    type: 'RESOLVE_EVENT_CHOICE', 
+                    payload: { cost: evt.choiceB.cost, wellbeing: 0 } 
+                })}
+                className="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold shadow-sm text-left px-6 flex justify-between hover:bg-gray-50 active:scale-95"
+            >
+                <span>{evt.choiceB.label}</span>
+                <span className="text-sm text-gray-400">
+                    {evt.choiceB.cost > 0 ? `-₹${evt.choiceB.cost}` : 'Free'}
+                </span>
+            </button>
+        </div>
       </div>
     </div>
   );
