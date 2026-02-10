@@ -20,12 +20,10 @@ export interface GameState {
   isPovertySpiral: boolean;
   phase: GamePhase;
 
-  // Farm Properties
   totalAcres: number; 
   farmSize: "<2" | "2-5" | ">5"; 
   farmType: "CROPS" | "VEGETABLES" | "MIXED";
 
-  // Land Loan
   landLoan: {
     principal: number;
     seasonEmi: number;
@@ -42,13 +40,11 @@ export interface GameState {
   ownedAssets: string[];
   loanHistory: { amount: number; paid: number; defaulted: boolean }[];
   
-  // Finance & Goals
   financialGoal: FinancialGoal | null;
   achievedGoals: string[];
   bankBalance: { fixedDeposit: number; fdMaturitySeason: number; goldGrams: number };
   dbtBalance: number;
 
-  // Logic
   cumulativeYield: number;
   cumulativePrice: number;
   seasonEventsLog: string[];
@@ -102,12 +98,23 @@ const INITIAL_STATE: GameState = {
   history: [],
 };
 
-// Helper: Calculate mitigated cost using Assets
+// 1. Helper: Reduce EVENT Costs
 const getMitigatedCost = (originalCost: number, eventType: string, assets: string[]) => {
   const relevantAssets = ASSETS.filter(a => assets.includes(a.id) && a.targetEventTypes?.includes(eventType));
   let discountMultiplier = 1.0;
   relevantAssets.forEach(a => { if (a.effectType === "COST_REDUCTION") discountMultiplier -= a.effectValue; });
   return Math.floor(originalCost * Math.max(0.1, discountMultiplier));
+};
+
+// 2. NEW Helper: Reduce FARMING INPUT Costs (Sowing)
+const getOperationalCost = (baseCost: number, assets: string[]) => {
+    let discount = 0;
+    // Tractor saves labor (15%)
+    if (assets.includes('mini_tractor')) discount += 0.15;
+    // Solar pump saves electricity/diesel (10%)
+    if (assets.includes('solar_pump')) discount += 0.10;
+    
+    return Math.floor(baseCost * (1 - discount));
 };
 
 type Action =
@@ -130,16 +137,18 @@ type Action =
 const performHarvestCalculation = (state: GameState): Partial<GameState> => {
   if (!state.currentCrop) return {};
 
-  // USE TOTAL ACRES (Dynamic) instead of helper
   const acres = state.totalAcres; 
-  const variance = 0.85 + Math.random() * 0.3; // 85% to 115% yield variance
+  const variance = 0.85 + Math.random() * 0.3; 
 
   const finalYieldPerAcre = state.currentCrop.minYield * variance * state.cumulativeYield;
   const totalYield = finalYieldPerAcre * acres;
   const finalPrice = state.currentCrop.pricePerUnit * state.cumulativePrice;
   const grossIncome = Math.floor(totalYield * finalPrice);
 
-  const cropCost = state.currentCrop.costPerAcre * acres;
+  // Apply Asset Discounts to Harvest Costs too (e.g. Harvesting Labor)
+  const baseCropCost = state.currentCrop.costPerAcre * acres;
+  const cropCost = getOperationalCost(baseCropCost, state.ownedAssets);
+
   const insuranceCost = (state.currentInsurance?.premium || 0) * acres;
   const interestRate = state.currentLoan ? state.currentLoan.interestRate : 0;
   const interestAmount = Math.floor(state.currentLoanAmount * interestRate);
@@ -186,7 +195,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     case "SET_FARM_SETUP": return { ...state, phase: "GOAL_SELECTION" }; 
     case "SET_GOAL": return { ...state, financialGoal: action.payload, phase: "FARM_SETUP" }; 
     
-    // FIX 1: ADD BRACES
     case "CONFIRM_FARM_SETUP": {
       const sizeStr = action.payload.size; 
       let acres = 2.0;
@@ -210,7 +218,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       if (state.savings < action.payload.cost) return state;
       return { ...state, savings: state.savings - action.payload.cost, ownedAssets: [...state.ownedAssets, action.payload.id] };
 
-    // FIX 2: ADD BRACES
     case "BUY_LAND": {
         const { acres, cost, downPayment } = action.payload;
         if(state.savings < downPayment) return state;
@@ -231,7 +238,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         };
     }
       
-    // FIX 3: ADD BRACES
     case "ACHIEVE_GOAL": {
         const { goal, isMain } = action.payload;
         if (state.savings < goal.targetAmount) return state;
@@ -241,7 +247,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         return { ...state, savings: newSavings, achievedGoals: newGoals, phase: nextPhase };
     }
 
-    // FIX 4: ADD BRACES
     case "BANK_TRANSACTION": {
       const { type, amount, grams } = action.payload;
       if (type === "DEPOSIT_FD") {
@@ -271,11 +276,14 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       return state;
     }
 
-    // FIX 5: ADD BRACES
     case "COMMIT_PLAN": {
       const { crop, loan, loanAmount, insurance, savingsAllocated } = action.payload;
-      const acres = state.totalAcres; // Use dynamic acres
-      const totalCropCost = crop.costPerAcre * acres;
+      const acres = state.totalAcres;
+      
+      // UPGRADE: Apply Operational Discount Here!
+      const baseTotalCost = crop.costPerAcre * acres;
+      const totalCropCost = getOperationalCost(baseTotalCost, state.ownedAssets);
+
       const totalInsuranceCost = insurance.premium * acres;
       const upfrontCost = totalCropCost + totalInsuranceCost;
       const liquidCash = savingsAllocated + loanAmount;
@@ -306,7 +314,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       const randomEvt = stageEvents.length > 0 ? stageEvents[Math.floor(Math.random() * stageEvents.length)] : EVENTS[0];
       return { ...state, currentEvent: randomEvt };
 
-    // FIX 6: ADD BRACES
     case "RESOLVE_EVENT_CHOICE": {
       const cost = action.payload.cost;
       const evt = state.currentEvent!;
@@ -357,7 +364,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       return nextState;
     }
 
-    // FIX 7: ADD BRACES
     case "REPAY_LOAN": {
       const { amount, type } = action.payload;
       let scoreChange = 0;
@@ -390,19 +396,17 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         }
         const dbt = 2000; 
 
-        // 4. NEW: LAND LOAN EMI LOGIC
+        // 4. LAND LOAN EMI LOGIC
         let newSavings = state.savings + maturedamount + dbt;
         let newLandLoan = { ...state.landLoan };
         let penaltyDebt = 0;
 
         if (state.landLoan.principal > 0) {
             if (newSavings >= state.landLoan.seasonEmi) {
-                // Auto-deduct EMI
                 newSavings -= state.landLoan.seasonEmi;
                 newLandLoan.principal = Math.max(0, newLandLoan.principal - (state.landLoan.seasonEmi * 0.7)); 
                 if(newLandLoan.principal === 0) newLandLoan.seasonEmi = 0;
             } else {
-                // Default! Penalty added to high-interest debt
                 penaltyDebt = 5000;
                 newLandLoan.missedPayments += 1;
             }
