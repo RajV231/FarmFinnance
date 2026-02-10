@@ -1,15 +1,18 @@
 import React from 'react';
-import { useGame, FinancialGoal } from '../context/game-context';
-import { Home, GraduationCap, Tractor } from 'lucide-react';
-
-const GOALS: FinancialGoal[] = [
-    { id: 'education', name: "Child's Education", targetAmount: 50000, description: "Secure a bright future for your children." },
-    { id: 'tractor', name: "Buy a Tractor", targetAmount: 150000, description: "Mechanize your farm for higher yields." },
-    { id: 'house', name: "Build Pucca House", targetAmount: 300000, description: "Safety and comfort for your family." },
-];
+import { useGame } from '../context/game-context';
+import { GOALS, FinancialGoal } from '../data/game-scenarios'; // CORRECT IMPORT
+import { Home, GraduationCap, Tractor, Target, Heart } from 'lucide-react';
 
 export const GoalSelectionScreen = () => {
     const { dispatch } = useGame();
+
+    const getIcon = (id: string) => {
+        if(id.includes('education')) return <GraduationCap className="text-green-700 w-6 h-6" />;
+        if(id.includes('tractor')) return <Tractor className="text-green-700 w-6 h-6" />;
+        if(id.includes('house')) return <Home className="text-green-700 w-6 h-6" />;
+        if(id.includes('wedding')) return <Heart className="text-green-700 w-6 h-6" />;
+        return <Target className="text-green-700 w-6 h-6" />;
+    };
 
     return (
         <div className="h-full bg-game-bg p-6 flex flex-col justify-center animate-slide-up">
@@ -17,16 +20,14 @@ export const GoalSelectionScreen = () => {
             <p className="text-gray-500 text-center mb-8">Financial literacy helps you achieve life goals.</p>
 
             <div className="space-y-4">
-                {GOALS.map(goal => (
+                {GOALS.map((goal: FinancialGoal) => (
                     <button 
                         key={goal.id}
                         onClick={() => dispatch({ type: 'SET_GOAL', payload: goal })}
                         className="w-full bg-white p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-game-primary transition-all flex items-center gap-4 text-left"
                     >
                         <div className="bg-green-100 p-3 rounded-full">
-                            {goal.id === 'education' && <GraduationCap className="text-green-700 w-6 h-6" />}
-                            {goal.id === 'tractor' && <Tractor className="text-green-700 w-6 h-6" />}
-                            {goal.id === 'house' && <Home className="text-green-700 w-6 h-6" />}
+                            {getIcon(goal.id)}
                         </div>
                         <div>
                             <h3 className="font-bold text-lg text-gray-800">{goal.name}</h3>

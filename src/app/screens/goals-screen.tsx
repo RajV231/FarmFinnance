@@ -1,20 +1,23 @@
 import React from 'react';
-import { useGame, FinancialGoal } from '../context/game-context';
-import { Target, Home, GraduationCap, Tractor, CheckCircle, Lock, ArrowLeft } from 'lucide-react';
-
-const ALL_GOALS: FinancialGoal[] = [
-    { id: 'education', name: "Child's Education", targetAmount: 50000, description: "Secure a bright future for your children." },
-    { id: 'tractor', name: "Buy a Tractor", targetAmount: 150000, description: "Mechanize your farm for higher yields." },
-    { id: 'house', name: "Build Pucca House", targetAmount: 300000, description: "Safety and comfort for your family." },
-];
+import { useGame } from '../context/game-context';
+import { GOALS, FinancialGoal } from '../data/game-scenarios'; // IMPORT GOALS
+import { Target, Home, GraduationCap, Tractor, CheckCircle, Lock, ArrowLeft, Heart } from 'lucide-react';
 
 export const GoalsScreen = () => {
     const { state, dispatch } = useGame();
 
     const handleAchieve = (goal: FinancialGoal, isMain: boolean) => {
-        if (window.confirm(`Are you sure you want to spend ₹${goal.targetAmount.toLocaleString()} to achieve this goal?`)) {
+        if (window.confirm(`Spend ₹${goal.targetAmount.toLocaleString()} to achieve ${goal.name}?`)) {
             dispatch({ type: 'ACHIEVE_GOAL', payload: { goal, isMain } });
         }
+    };
+
+    const getIcon = (id: string) => {
+        if(id.includes('education')) return <GraduationCap className="w-6 h-6" />;
+        if(id.includes('tractor')) return <Tractor className="w-6 h-6" />;
+        if(id.includes('house')) return <Home className="w-6 h-6" />;
+        if(id.includes('wedding')) return <Heart className="w-6 h-6" />;
+        return <Target className="w-6 h-6" />;
     };
 
     return (
@@ -30,7 +33,7 @@ export const GoalsScreen = () => {
              </div>
 
              <div className="space-y-4">
-                {ALL_GOALS.map(goal => {
+                {GOALS.map(goal => {
                     const isMain = state.financialGoal?.id === goal.id;
                     const isAchieved = state.achievedGoals.includes(goal.id);
                     const canAfford = state.savings >= goal.targetAmount;
@@ -39,10 +42,8 @@ export const GoalsScreen = () => {
                         <div key={goal.id} className={`p-5 rounded-xl border-2 shadow-sm ${isMain ? 'border-yellow-400 bg-yellow-50' : 'border-gray-100 bg-white'}`}>
                             <div className="flex justify-between items-start mb-2">
                                 <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-full ${isAchieved ? 'bg-green-100' : 'bg-gray-100'}`}>
-                                        {goal.id === 'education' && <GraduationCap className={`w-6 h-6 ${isAchieved ? 'text-green-600' : 'text-gray-500'}`} />}
-                                        {goal.id === 'tractor' && <Tractor className={`w-6 h-6 ${isAchieved ? 'text-green-600' : 'text-gray-500'}`} />}
-                                        {goal.id === 'house' && <Home className={`w-6 h-6 ${isAchieved ? 'text-green-600' : 'text-gray-500'}`} />}
+                                    <div className={`p-2 rounded-full ${isAchieved ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                                        {getIcon(goal.id)}
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
