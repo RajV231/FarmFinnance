@@ -98,7 +98,6 @@ const INITIAL_STATE: GameState = {
   history: [],
 };
 
-// 1. Helper: Reduce EVENT Costs
 const getMitigatedCost = (originalCost: number, eventType: string, assets: string[]) => {
   const relevantAssets = ASSETS.filter(a => assets.includes(a.id) && a.targetEventTypes?.includes(eventType));
   let discountMultiplier = 1.0;
@@ -106,14 +105,10 @@ const getMitigatedCost = (originalCost: number, eventType: string, assets: strin
   return Math.floor(originalCost * Math.max(0.1, discountMultiplier));
 };
 
-// 2. NEW Helper: Reduce FARMING INPUT Costs (Sowing)
 const getOperationalCost = (baseCost: number, assets: string[]) => {
     let discount = 0;
-    // Tractor saves labor (15%)
     if (assets.includes('mini_tractor')) discount += 0.15;
-    // Solar pump saves electricity/diesel (10%)
     if (assets.includes('solar_pump')) discount += 0.10;
-    
     return Math.floor(baseCost * (1 - discount));
 };
 
@@ -145,7 +140,7 @@ const performHarvestCalculation = (state: GameState): Partial<GameState> => {
   const finalPrice = state.currentCrop.pricePerUnit * state.cumulativePrice;
   const grossIncome = Math.floor(totalYield * finalPrice);
 
-  // Apply Asset Discounts to Harvest Costs too (e.g. Harvesting Labor)
+  // Apply Operational Discounts
   const baseCropCost = state.currentCrop.costPerAcre * acres;
   const cropCost = getOperationalCost(baseCropCost, state.ownedAssets);
 
@@ -239,12 +234,22 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     }
       
     case "ACHIEVE_GOAL": {
-        const { goal, isMain } = action.payload;
+        const { goal } = action.payload;
+        // 1. Check affordability
         if (state.savings < goal.targetAmount) return state;
+        
+        // 2. Deduct money
         const newSavings = state.savings - goal.targetAmount;
         const newGoals = [...state.achievedGoals, goal.id];
-        const nextPhase = isMain ? "GAME_WIN" : "GOALS"; 
-        return { ...state, savings: newSavings, achievedGoals: newGoals, phase: nextPhase };
+        
+        // 3. FIX: Do NOT end game automatically. Keep playing.
+        // The player can choose to restart from Dashboard if they are done.
+        return { 
+            ...state, 
+            savings: newSavings, 
+            achievedGoals: newGoals, 
+            phase: "GOALS" // Stay on goals screen to see the "Completed" badge
+        };
     }
 
     case "BANK_TRANSACTION": {
@@ -263,10 +268,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       }
       if (type === "PAY_LAND_PRINCIPAL") {
           if(state.savings < amount) return state;
-          
           let newPrincipal = Math.max(0, state.landLoan.principal - amount);
           let newEmi = newPrincipal === 0 ? 0 : state.landLoan.seasonEmi;
-          
           return {
               ...state,
               savings: state.savings - amount,
@@ -280,7 +283,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       const { crop, loan, loanAmount, insurance, savingsAllocated } = action.payload;
       const acres = state.totalAcres;
       
-      // UPGRADE: Apply Operational Discount Here!
       const baseTotalCost = crop.costPerAcre * acres;
       const totalCropCost = getOperationalCost(baseTotalCost, state.ownedAssets);
 
@@ -381,13 +383,9 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     case "SHOW_RESILIENCE": return { ...state, phase: "RESILIENCE" };
 
     case "NEXT_SEASON":
-        // 1. Loss Check (High Debt)
         if (state.debt > 200000) return { ...state, phase: 'GAME_LOSS' };
-        
-        // 2. Time Check
         if (state.seasonNumber >= state.maxSeasons) return { ...state, phase: "SUMMARY" };
 
-        // 3. FD & DBT Logic
         let maturedamount = 0;
         let newFD = state.bankBalance.fixedDeposit;
         if (state.seasonNumber >= state.bankBalance.fdMaturitySeason && state.bankBalance.fixedDeposit > 0) {
@@ -396,7 +394,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         }
         const dbt = 2000; 
 
-        // 4. LAND LOAN EMI LOGIC
         let newSavings = state.savings + maturedamount + dbt;
         let newLandLoan = { ...state.landLoan };
         let penaltyDebt = 0;
@@ -422,7 +419,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             dbtBalance: state.dbtBalance + dbt,
             landLoan: newLandLoan,
             
-            // RESET SEASONAL VARIABLES
             currentCrop: null, currentLoan: null, currentEvent: null,
             cumulativeYield: 1.0, cumulativePrice: 1.0, 
             seasonEventsLog: [], seasonFinancialHits: 0
@@ -437,11 +433,19 @@ const GameContext = createContext<{ state: GameState; dispatch: React.Dispatch<A
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
+
   useEffect(() => {
-    const saved = loadGame<GameState>();
-    if (saved && saved.phase !== "SPLASH") { dispatch({ type: "LOAD_GAME", payload: saved }); }
-    else { setTimeout(() => dispatch({ type: "SET_LANGUAGE_PHASE" }), 2000); }
+    // UPDATED LOGIC: Always wait 2.5s for splash, then load game OR start new
+    setTimeout(() => {
+        const saved = loadGame<GameState>();
+        if (saved && saved.phase !== "SPLASH") {
+            dispatch({ type: "LOAD_GAME", payload: saved });
+        } else {
+            dispatch({ type: "SET_LANGUAGE_PHASE" });
+        }
+    }, 2500);
   }, []);
+
   useEffect(() => { if (state.phase !== "SPLASH") saveGame(state); }, [state]);
   return <GameContext.Provider value={{ state, dispatch }}>{children}</GameContext.Provider>;
 };

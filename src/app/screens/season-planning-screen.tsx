@@ -1,14 +1,13 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useGame } from '../context/game-context';
 import { CROPS, LOANS, INSURANCES } from '../data/game-scenarios';
-import { Shield, Coins, Ruler, AlertTriangle } from 'lucide-react';
+import { Shield, Coins, Ruler, AlertTriangle, ArrowLeft } from 'lucide-react';
 import clsx from 'clsx';
 import { FarmVisualizer } from '../components/farm-visualizer';
 
 export const SeasonPlanningScreen = () => {
   const { dispatch, state } = useGame();
   
-  // FIX: Use the dynamic 'totalAcres' from state, NOT the helper function
   const acres = state.totalAcres; 
 
   const availableCrops = useMemo(() => {
@@ -21,26 +20,21 @@ export const SeasonPlanningScreen = () => {
   const [loanId, setLoanId] = useState<string | null>(null);
   const [loanAmount, setLoanAmount] = useState(0);
   const [hasInsurance, setInsurance] = useState(false);
-  
-  // Default savings alloc: max 50% of savings or cost
   const [savingsAlloc, setSavingsAlloc] = useState(Math.min(5000, state.savings));
 
   const selectedCrop = CROPS.find(c => c.id === cropId)!;
   const selectedLoan = loanId ? LOANS.find(l => l.id === loanId)! : LOANS[0];
 
-  // Calculate Costs based on NEW acres
   const totalSeedCost = selectedCrop.costPerAcre * acres;
   const insuranceCost = hasInsurance ? (INSURANCES[1].premium * acres) : 0;
   const totalUpfrontCost = totalSeedCost + insuranceCost;
 
   const handleConfirm = () => {
     const available = savingsAlloc + (loanId ? loanAmount : 0);
-    
     if (available < totalUpfrontCost) {
         alert(`Insufficient Funds! You need ₹${totalUpfrontCost.toLocaleString()} for ${acres} acres. Increase Loan or Savings.`);
         return;
     }
-
     dispatch({
         type: 'COMMIT_PLAN',
         payload: {
@@ -55,18 +49,25 @@ export const SeasonPlanningScreen = () => {
 
   return (
     <div className="bg-game-bg min-h-full flex flex-col">
+        {/* HEADER WITH BACK BUTTON */}
+        <div className="bg-white p-4 flex items-center gap-2 shadow-sm z-10">
+            <button 
+                onClick={() => dispatch({ type: 'GO_TO_DASHBOARD' })} 
+                className="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200"
+            >
+                <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h2 className="text-xl font-bold text-game-primary">Plan Season {state.seasonNumber}</h2>
+        </div>
+
         <div className="p-4 pb-0">
             <FarmVisualizer state={state} />
         </div>
 
         <div className="flex-grow p-4 md:p-8 pb-24 md:pb-8 overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h2 className="text-xl md:text-2xl font-bold text-game-primary">Season Planning</h2>
-                    {/* Display Real Acres */}
-                    <div className="flex items-center gap-2 text-xs text-gray-500 font-medium mt-1">
-                        <Ruler className="w-3 h-3" /> {acres.toFixed(1)} Acres • {state.farmType} Farm
-                    </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 font-medium mt-1">
+                    <Ruler className="w-3 h-3" /> {acres.toFixed(1)} Acres • {state.farmType} Farm
                 </div>
                 <div className="bg-white px-4 py-2 rounded-full shadow text-sm md:text-base font-mono font-bold text-game-primaryDark">
                     ₹{state.savings.toLocaleString()} Avail
@@ -111,12 +112,8 @@ export const SeasonPlanningScreen = () => {
                         <span className="font-bold text-game-primary">₹{savingsAlloc.toLocaleString()}</span>
                     </div>
                     <input 
-                        type="range" 
-                        min="0" 
-                        max={state.savings} 
-                        step="500"
-                        value={savingsAlloc}
-                        onChange={(e) => setSavingsAlloc(Number(e.target.value))}
+                        type="range" min="0" max={state.savings} step="500"
+                        value={savingsAlloc} onChange={(e) => setSavingsAlloc(Number(e.target.value))}
                         className="w-full accent-game-primary h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                     />
                 </section>
@@ -136,9 +133,7 @@ export const SeasonPlanningScreen = () => {
                    
                     <div className="space-y-3">
                         {LOANS.filter(l => l.maxAmount > 0).map(l => {
-                            // Scale max loan amount by land size (Rich farmers get bigger loans)
                             const realMaxAmount = l.maxAmount * (acres / 2); 
-                            
                             return (
                                 <div key={l.id} className={clsx("rounded-lg border transition-all", loanId === l.id ? "border-game-primary bg-green-50 ring-1 ring-game-primary" : "border-gray-100")}>
                                     <button
@@ -160,12 +155,8 @@ export const SeasonPlanningScreen = () => {
                                                 <span className="font-bold text-game-primary">₹{loanAmount.toLocaleString()}</span>
                                             </div>
                                             <input 
-                                                type="range" 
-                                                min="0" 
-                                                max={realMaxAmount} 
-                                                step="1000"
-                                                value={loanAmount}
-                                                onChange={(e) => setLoanAmount(Number(e.target.value))}
+                                                type="range" min="0" max={realMaxAmount} step="1000"
+                                                value={loanAmount} onChange={(e) => setLoanAmount(Number(e.target.value))}
                                                 className="w-full accent-game-primary h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                             />
                                             <div className="flex justify-between text-[10px] text-gray-400">
@@ -187,7 +178,7 @@ export const SeasonPlanningScreen = () => {
                         <div>
                             <div className="font-bold text-lg">Crop Insurance</div>
                             <div className="text-sm text-gray-500">
-                                Cost: ₹{insuranceCost.toLocaleString()} (for {acres} acres)
+                                Cost: ₹{insuranceCost.toLocaleString()} (for {acres.toFixed(1)} acres)
                             </div>
                         </div>
                     </div>
