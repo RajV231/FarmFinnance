@@ -15,12 +15,21 @@ import { ReportsScreen } from './app/screens/reports-screen';
 import { ShopScreen } from './app/screens/shop-screen';
 import { GoalSelectionScreen } from './app/screens/goal-selection-screen';
 import { BankScreen } from './app/screens/bank-screen';
-import { GoalsScreen } from './app/screens/goals-screen'; // NEW IMPORT
+import { GoalsScreen } from './app/screens/goals-screen'; 
 
 const ScreenRouter = () => {
   const { state } = useGame();
 
-  if (state.phase === 'SPLASH') return <div className="h-screen flex items-center justify-center text-4xl font-bold text-game-primary">KrishiNiti 🌱</div>;
+  // FIX: Restored the original Splash Screen design
+  if (state.phase === 'SPLASH') {
+    return (
+        <div className="h-full flex flex-col items-center justify-center bg-game-bg animate-fade-in min-h-screen">
+            <div className="text-8xl mb-6">🌱</div>
+            <h1 className="text-4xl md:text-6xl font-bold text-game-primary mb-4">KrishiNiti</h1>
+            <p className="text-gray-500 text-xl">Farming & Finance Game</p>
+        </div>
+    );
+  }
 
   const screens: Record<GamePhase, React.ReactNode> = {
     'SPLASH': null,
@@ -32,7 +41,7 @@ const ScreenRouter = () => {
     'REPORTS': <ReportsScreen />,
     'SHOP': <ShopScreen />,
     'BANK': <BankScreen />,
-    'GOALS': <GoalsScreen />, // NEW
+    'GOALS': <GoalsScreen />, 
     'PLANNING': <SeasonPlanningScreen />,
     'EVENT_EARLY': <EventScreen />,
     'EVENT_MID': <EventScreen />,
@@ -45,9 +54,13 @@ const ScreenRouter = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center md:p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-0 md:p-4">
         <div className="w-full md:max-w-4xl bg-game-bg md:bg-white md:shadow-2xl md:rounded-2xl overflow-hidden min-h-screen md:min-h-[800px] flex flex-col relative">
-            {screens[state.phase] || <div>Unknown Phase: {state.phase}</div>}
+            {screens[state.phase] || (
+                <div className="flex items-center justify-center h-full text-red-500 font-bold">
+                    Unknown Phase: {state.phase}
+                </div>
+            )}
         </div>
     </div>
   );
