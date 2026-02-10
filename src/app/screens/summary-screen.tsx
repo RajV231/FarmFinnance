@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGame } from '../context/game-context';
 import { Trophy, TrendingUp, AlertTriangle, UserCheck } from 'lucide-react';
+import { ASSETS } from '../data/game-scenarios';
 
 export const SummaryScreen = () => {
     const { dispatch, state } = useGame();
@@ -9,6 +10,7 @@ export const SummaryScreen = () => {
     const calculatePersona = () => {
         const { savingsScore, debtScore, riskScore } = state.resilienceBreakdown;
         const avgScore = state.resilienceScore;
+        const hasPension = state.ownedAssets.includes('pension_scheme');
 
         if (avgScore > 80) return { 
             title: "The Krishi Ratna", 
@@ -27,6 +29,12 @@ export const SummaryScreen = () => {
             desc: "Good savings habits, but you need better insurance protection.",
             color: "text-blue-600",
             bg: "bg-blue-100"
+        };
+        if (hasPension && state.savings > 0) return {
+            title: "The Visionary Planner",
+            desc: "Outstanding! You secured your crops AND your old age (Pension).",
+            color: "text-purple-600",
+            bg: "bg-purple-100"
         };
         return { 
             title: "The Survivor", 

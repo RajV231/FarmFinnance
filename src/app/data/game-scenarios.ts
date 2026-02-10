@@ -108,11 +108,22 @@ export const ASSETS: Asset[] = [
     effectType: 'PRICE_BUFFER',
     targetEventTypes: ['MARKET'],
     effectValue: 1.0 
+  },
+  {
+    id: 'pension_scheme',
+    name: 'Atal Pension Yojana',
+    type: 'PROTECTION', // "Retirement" category
+    cost: 5000, // One-time setup/contribution for game simplification
+    maintenanceCost: 0,
+    description: 'Government pension scheme. Guarantees income in old age.',
+    effectType: 'PRICE_BUFFER', // Doesn't perfectly fit types, but acts as a safety net
+    effectValue: 0.0, // No immediate farm benefit
+    // NOTE: We will handle the "Score Bonus" for this specifically in the Summary Screen logic
   }
 ];
 
 export const LOANS: Loan[] = [
-  { id: 'kcc', name: 'Kisan Credit Card (Govt)', interestRate: 0.07, maxAmount: 50000, provider: 'BANK', minCreditScore: 700 },
+  { id: 'kcc', name: 'Kisan Credit Card (Govt)', interestRate: 0.07, maxAmount: 50000, provider: 'BANK', minCreditScore: 700, },
   { id: 'coop', name: 'Co-operative Society', interestRate: 0.12, maxAmount: 30000, provider: 'COOP', minCreditScore: 600 },
   { id: 'sahukar', name: 'Village Moneylender', interestRate: 0.36, maxAmount: 100000, provider: 'MONEYLENDER', minCreditScore: 0 }
 ];
@@ -144,6 +155,21 @@ export const EVENTS: GameEvent[] = [
     yieldImpact: 0.8,
     choiceA: { label: 'Rent Water Tanker', cost: 3500, mitigatedYield: 0.95 },
     choiceB: { label: 'Hope for rain', cost: 0 }
+  },
+  { 
+    id: 'defective_seeds', timing: 'EARLY', type: 'MARKET', severity: 4,
+    titleKey: 'Defective Seeds', descKey: 'The seeds you bought didn\'t sprout. The shopkeeper refuses refund.',
+    yieldImpact: 0.8, // Loss if you do nothing
+    choiceA: { 
+        label: 'File Consumer Complaint', // The "Consumer Rights" choice
+        cost: 500, // Small legal/travel fee
+        mitigatedYield: 1.0, // You get replacement seeds!
+        mitigatedWellbeing: 10 // Confidence boost
+    },
+    choiceB: { 
+        label: 'Buy New Seeds', // The "Passive" choice
+        cost: 2000 // Expensive replacement
+    }
   },
 
   // --- MID SEASON (3 Events) ---

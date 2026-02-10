@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useGame } from '../context/game-context';
 import { CloudRain, AlertTriangle, TrendingDown, Bug, HeartPulse, Tractor } from 'lucide-react';
 import { FarmVisualizer } from '../components/farm-visualizer'; // IMPORT
+import { SpeakerButton } from '../components/speaker-button';
 
 export const EventScreen = () => {
   const { state, dispatch } = useGame();
@@ -34,6 +35,7 @@ export const EventScreen = () => {
       return 0;
   };
   const phaseIdx = getPhaseIndex();
+  const textToRead = `${evt.titleKey}. ${evt.descKey}. What will you do? Option A: ${evt.choiceA.label}, cost ${evt.choiceA.cost} rupees. Option B: ${evt.choiceB.label}, cost ${evt.choiceB.cost} rupees.`;
 
   return (
     <div className={`h-full flex flex-col bg-game-bg animate-fade-in overflow-y-auto`}>
@@ -55,7 +57,11 @@ export const EventScreen = () => {
         </div>
         
         {/* Event Card */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 relative"> 
+            {/* ADD SPEAKER BUTTON HERE */}
+            <div className="absolute top-4 right-4 z-10">
+                <SpeakerButton text={textToRead} />
+            </div>
             <div className={`p-6 flex flex-col items-center text-center ${isShock ? 'bg-red-100' : 'bg-blue-50'}`}>
                 {getIcon()}
                 <h2 className="text-2xl font-bold mb-2">{evt.titleKey}</h2>
