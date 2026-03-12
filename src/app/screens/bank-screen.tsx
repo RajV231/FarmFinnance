@@ -8,6 +8,7 @@ export const BankScreen = () => {
     const [goldGrams, setGoldGrams] = useState(0);
     const [loanRepay, setLoanRepay] = useState(0);
 
+    // Centralized gold rate constant (₹6000 per gram)
     const goldRate = 6000; 
 
     return (
