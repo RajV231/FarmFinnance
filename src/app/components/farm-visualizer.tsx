@@ -99,7 +99,7 @@ export const FarmVisualizer = ({ state }: { state: GameState }) => {
       </div>
 
       {/* --- ASSET LAYER (Background) --- */}
-      {ownedAssets.includes('tractor') && (
+      {ownedAssets.includes('mini_tractor') && (
         <Tractor className="absolute bottom-1/3 left-2 w-16 h-16 text-blue-600 opacity-80 z-0" />
       )}
 
