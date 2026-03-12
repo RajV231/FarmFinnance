@@ -1,12 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useGame } from '../context/game-context';
-import { CROPS, LOANS, INSURANCES } from '../data/game-scenarios';
-import { Shield, Coins, Ruler, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { CROPS, LOANS, INSURANCES, GOVERNMENT_SCHEMES } from '../data/game-scenarios';
+import { Shield, Coins, Ruler, AlertTriangle, ArrowLeft, TrendingUp, TrendingDown, Info, BarChart3 } from 'lucide-react';
 import clsx from 'clsx';
 import { FarmVisualizer } from '../components/farm-visualizer';
+import { EducationPopup, useEducationTip } from '../components/education-popup';
+import { MarketPricesModal, useMarketModal } from '../components/market-prices-modal';
 
 export const SeasonPlanningScreen = () => {
   const { dispatch, state } = useGame();
+  
+  // Initialize hooks for Phase 1 features
+  const educationTip = useEducationTip();
+  const marketModal = useMarketModal();
   
   const acres = state.totalAcres; 
 
@@ -28,6 +34,25 @@ export const SeasonPlanningScreen = () => {
   const totalSeedCost = selectedCrop.costPerAcre * acres;
   const insuranceCost = hasInsurance ? (INSURANCES[1].premium * acres) : 0;
   const totalUpfrontCost = totalSeedCost + insuranceCost;
+
+  // Trigger education tips based on user actions
+  useEffect(() => {
+    if (selectedCrop.riskFactor > 0.7) {
+      educationTip.showTip('high_risk_crop_selected');
+    }
+  }, [cropId]);
+
+  useEffect(() => {
+    if (!loanId && totalUpfrontCost > state.savings) {
+      educationTip.showTip('loan_selection');
+    }
+  }, [loanId, totalUpfrontCost]);
+
+  useEffect(() => {
+    if (!hasInsurance) {
+      educationTip.showTip('insurance_selection');
+    }
+  }, [hasInsurance]);
 
   const handleConfirm = () => {
     const available = savingsAlloc + (loanId ? loanAmount : 0);
@@ -78,7 +103,18 @@ export const SeasonPlanningScreen = () => {
                 
                 {/* 1. Crop Selection */}
                 <section className="mb-6 bg-white p-4 rounded-xl shadow-sm md:col-span-2">
-                    <h3 className="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">Select Crop</h3>
+                    <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Select Crop</h3>
+                        {state.marketPrices.length > 0 && (
+                            <button
+                                onClick={marketModal.openModal}
+                                className="flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-medium hover:bg-blue-200 transition-colors"
+                            >
+                                <BarChart3 className="w-3 h-3" />
+                                View Market Prices
+                            </button>
+                        )}
+                    </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {availableCrops.map(c => {
                             const cost = c.costPerAcre * acres;
@@ -176,9 +212,19 @@ export const SeasonPlanningScreen = () => {
                     <div className="flex items-center gap-3">
                         <Shield className="w-8 h-8 text-game-primary" />
                         <div>
-                            <div className="font-bold text-lg">Crop Insurance</div>
+                            <div className="font-bold text-lg flex items-center gap-2">
+                                Crop Insurance
+                                {hasInsurance && (
+                                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                    PMFBY Subsidy: ₹{(INSURANCES[1].premium * acres * 0.9).toLocaleString()}
+                                  </span>
+                                )}
+                            </div>
                             <div className="text-sm text-gray-500">
-                                Cost: ₹{insuranceCost.toLocaleString()} (for {acres.toFixed(1)} acres)
+                              {hasInsurance 
+                                ? `After 90% PMFBY subsidy: ₹{(insuranceCost * 0.1).toLocaleString()}`
+                                : `Cost: ₹{insuranceCost.toLocaleString()} (for ${acres.toFixed(1)} acres)`
+                              }
                             </div>
                         </div>
                     </div>
@@ -188,6 +234,39 @@ export const SeasonPlanningScreen = () => {
                     >
                         <div className={clsx("w-6 h-6 bg-white rounded-full absolute top-1 transition-all shadow-sm", hasInsurance ? "left-7" : "left-1")}></div>
                     </button>
+                </section>
+
+                {/* Government Schemes Info */}
+                <section className="mb-6 bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-xl border border-blue-200 md:col-span-2">
+                    <div className="flex items-start gap-3">
+                        <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div className="flex-1">
+                            <h4 className="font-bold text-blue-800 text-sm mb-2">Government Benefits This Season</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">PM-KISAN:</span>
+                                    <span className="font-bold text-green-700">+₹2,000</span>
+                                </div>
+                                {hasInsurance && (
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">PMFBY Subsidy:</span>
+                                        <span className="font-bold text-green-700">+₹{(INSURANCES[1].premium * acres * 0.9).toLocaleString()}</span>
+                                    </div>
+                                )}
+                                {loanId === 'kcc' && (
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">KCC Interest Subvention:</span>
+                                        <span className="font-bold text-green-700">2% off</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="mt-2 pt-2 border-t border-blue-200">
+                                <p className="text-xs text-blue-700">
+                                    💡 These benefits are automatically credited via DBT (Direct Benefit Transfer)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
                 {/* Total Cost */}
@@ -213,6 +292,19 @@ export const SeasonPlanningScreen = () => {
                 Confirm Season Plan
             </button>
         </div>
+
+        {/* Education Popup */}
+        {educationTip.isShowing && (
+            <EducationPopup 
+                context={educationTip.currentContext!} 
+                onClose={educationTip.hideTip} 
+            />
+        )}
+
+        {/* Market Prices Modal */}
+        {marketModal.isOpen && (
+            <MarketPricesModal onClose={marketModal.closeModal} />
+        )}
     </div>
   );
 };

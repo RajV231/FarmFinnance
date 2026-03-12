@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from "react";
-import { Crop, Loan, Insurance, GameEvent, EVENTS, ASSETS, Asset, FinancialGoal } from "../data/game-scenarios";
+import { Crop, Loan, Insurance, GameEvent, EVENTS, ASSETS, Asset, FinancialGoal, MarketData, GovernmentScheme } from "../data/game-scenarios";
 import { saveGame, loadGame, clearGame } from "../utils/storage";
 import { calculateResilienceScore, detectPovertySpiral } from "../utils/game-calculations";
 import { selectEvent } from "../engine/event-engine";
+import { generateMarketPrices, resetMarket } from "../engine/market-engine";
+import { CROPS, GOVERNMENT_SCHEMES } from "../data/game-scenarios";
 
 export type GamePhase =
   | "SPLASH" | "LANGUAGE" | "GOAL_SELECTION" | "FARM_SETUP" | "DASHBOARD"
@@ -60,6 +62,11 @@ export interface GameState {
     eventCost: number;
   } | null;
   history: any[];
+  // Phase 1 Features: Dynamic Markets, Government Schemes, Education
+  marketPrices: MarketData[];
+  activeSchemes: string[]; // IDs of schemes player has enrolled in
+  dbtReceived: number; // Total DBT received from government schemes
+  lastEducationTipId: string | null; // Track last shown tip to avoid repetition
 }
 
 const INITIAL_STATE: GameState = {
@@ -97,6 +104,11 @@ const INITIAL_STATE: GameState = {
   seasonFinancialHits: 0,
   lastHarvestStats: null,
   history: [],
+  // Phase 1 Features initialization
+  marketPrices: [],
+  activeSchemes: [],
+  dbtReceived: 0,
+  lastEducationTipId: null,
 };
 
 const getMitigatedCost = (originalCost: number, eventType: string, assets: string[]) => {
@@ -281,8 +293,33 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     }
 
     case "COMMIT_PLAN": {
-      const { crop, loan, loanAmount, insurance, savingsAllocated } = action.payload;
+      const { crop, loan, insurance, savingsAllocated } = action.payload;
       const acres = state.totalAcres;
+      
+      // Generate dynamic market prices for this season
+      const newMarketPrices = generateMarketPrices(CROPS, state.seasonNumber);
+      
+      // Calculate government scheme benefits
+      let schemeBenefits = 0;
+      const newlyActiveSchemes: string[] = [...state.activeSchemes];
+      
+      // PM-KISAN benefit (₹2000 per season if eligible)
+      if (!newlyActiveSchemes.includes('pm_kisan')) {
+        newlyActiveSchemes.push('pm_kisan');
+        schemeBenefits += 2000;
+      }
+      
+      // PMFBY subsidy if insurance is purchased
+      if (insurance.id !== 'none' && !newlyActiveSchemes.includes('pmfby_subsidy')) {
+        newlyActiveSchemes.push('pmfby_subsidy');
+        schemeBenefits += 1620; // 90% subsidy on premium
+      }
+      
+      // KCC interest subvention calculation
+      if (loan.id === 'kcc') {
+        const interestSubvention = loan.interestRate * loanAmount * 0.02; // 2% subvention
+        schemeBenefits += Math.floor(interestSubvention);
+      }
       
       const baseTotalCost = crop.costPerAcre * acres;
       const totalCropCost = getOperationalCost(baseTotalCost, state.ownedAssets);
@@ -291,7 +328,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       const upfrontCost = totalCropCost + totalInsuranceCost;
       const liquidCash = savingsAllocated + loanAmount;
       const remainingSavings = state.savings - savingsAllocated;
-      const finalCashForSeason = Math.max(0, liquidCash - upfrontCost + remainingSavings); 
+      // Add scheme benefits to final cash
+      const finalCashForSeason = Math.max(0, liquidCash - upfrontCost + remainingSavings + schemeBenefits); 
 
       return {
         ...state,
@@ -306,6 +344,9 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         cumulativePrice: 1.0,
         seasonEventsLog: [],
         seasonFinancialHits: 0,
+        marketPrices: newMarketPrices,
+        activeSchemes: newlyActiveSchemes,
+        dbtReceived: state.dbtReceived + schemeBenefits,
       };
     }
 
@@ -402,9 +443,11 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             maturedamount = Math.floor(state.bankBalance.fixedDeposit * 1.065); 
             newFD = 0; 
         }
-        const dbt = 2000; 
-
-        let newSavings = state.savings + maturedamount + dbt;
+        
+        // DBT from government schemes (PM-KISAN + any other applicable)
+        const dbtFromSchemes = 2000; // PM-KISAN installment
+        
+        let newSavings = state.savings + maturedamount + dbtFromSchemes;
         let newLandLoan = { ...state.landLoan };
         let penaltyDebt = 0;
 
@@ -427,15 +470,20 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             savings: newSavings, 
             debt: state.debt + penaltyDebt,
             bankBalance: { ...state.bankBalance, fixedDeposit: newFD },
-            dbtBalance: state.dbtBalance + dbt,
+            dbtBalance: state.dbtBalance + dbtFromSchemes,
             landLoan: newLandLoan,
             
             currentCrop: null, currentLoan: null, currentEvent: null,
             cumulativeYield: 1.0, cumulativePrice: 1.0, 
-            seasonEventsLog: [], seasonFinancialHits: 0
+            seasonEventsLog: [], seasonFinancialHits: 0,
+            // Reset market prices for new season (will be regenerated on planning)
+            marketPrices: [],
         };
 
-    case "RESET_GAME": clearGame(); return INITIAL_STATE;
+    case "RESET_GAME": 
+      resetMarket(); // Reset market state for new game
+      clearGame(); 
+      return INITIAL_STATE;
     default: return state;
   }
 };

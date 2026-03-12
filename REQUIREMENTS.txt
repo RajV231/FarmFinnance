@@ -1,0 +1,39 @@
+# KrishiNiti Simulator - Required Dependencies
+
+## Core Dependencies (Already Installed)
+react@^18.2.0
+react-dom@^18.2.0
+typescript@^5.2.2
+vite@^7.3.1
+tailwindcss@^3.4.19
+lucide-react@^0.344.0
+clsx@^2.1.0
+tailwind-merge@^2.2.1
+
+## Development Dependencies (Already Installed)
+@types/react@^18.2.64
+@types/react-dom@^18.2.21
+@vitejs/plugin-react@^4.2.1
+autoprefixer@^10.4.18
+postcss@^8.4.35
+vite-plugin-pwa@^1.2.0
+
+## Installation Command
+npm install
+
+## Optional Dependencies for Future Phases
+# recharts - For advanced data visualization (Phase 2)
+# framer-motion - For enhanced animations
+# react-confetti - For achievement celebrations
+# howler - For sound effects (Phase 3)
+# i18next - For multi-language support enhancement
+
+## Node Requirements
+Node.js >= 18.x
+npm >= 9.x
+
+## Build Commands
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run preview  # Preview production build
+npm run lint     # Run ESLint
