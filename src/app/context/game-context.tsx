@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { Crop, Loan, Insurance, GameEvent, EVENTS, ASSETS, Asset, FinancialGoal } from "../data/game-scenarios";
 import { saveGame, loadGame, clearGame } from "../utils/storage";
 import { calculateResilienceScore, detectPovertySpiral } from "../utils/game-calculations";
+import { selectEvent } from "../engine/event-engine";
 
 export type GamePhase =
   | "SPLASH" | "LANGUAGE" | "GOAL_SELECTION" | "FARM_SETUP" | "DASHBOARD"
@@ -308,13 +309,20 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       };
     }
 
-    case "TRIGGER_EVENT":
+    case "TRIGGER_EVENT": {
       let stage: "EARLY" | "MID" | "LATE" = "EARLY";
       if (state.phase === "EVENT_MID") stage = "MID";
       if (state.phase === "EVENT_LATE") stage = "LATE";
-      const stageEvents = EVENTS.filter((e) => e.timing === stage);
-      const randomEvt = stageEvents.length > 0 ? stageEvents[Math.floor(Math.random() * stageEvents.length)] : EVENTS[0];
-      return { ...state, currentEvent: randomEvt };
+      // Use the Event Engine for intelligent event selection
+      const context = {
+        season: state.seasonNumber,
+        riskExposure: 1 - (state.resilienceScore / 1000), // Higher resilience = lower risk
+        recentEvents: state.eventHistory.slice(-3).map(e => e.id)
+      };
+      const selectedEvent = selectEvent(context);
+
+      return { ...state, currentEvent: selectedEvent };
+    }
 
     case "RESOLVE_EVENT_CHOICE": {
       const cost = action.payload.cost;
@@ -375,7 +383,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
       const remainingDebt = Math.max(0, state.debt - amount);
       const newScore = Math.min(900, Math.max(300, state.creditScore + scoreChange));
-      const phaseAfterRepay = remainingDebt === 0 ? "HARVEST" : "RESILIENCE";
+      // After repayment, go to RESILIENCE phase to review status before next season
+      const phaseAfterRepay = "RESILIENCE";
 
       return { ...state, debt: remainingDebt, savings: state.savings - amount, creditScore: newScore, phase: phaseAfterRepay };
     }
@@ -389,7 +398,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         let maturedamount = 0;
         let newFD = state.bankBalance.fixedDeposit;
         if (state.seasonNumber >= state.bankBalance.fdMaturitySeason && state.bankBalance.fixedDeposit > 0) {
-            maturedamount = Math.floor(state.bankBalance.fixedDeposit * 1.1); 
+            // Realistic FD rate: 6.5% per annum, 2 seasons = 1 year
+            maturedamount = Math.floor(state.bankBalance.fixedDeposit * 1.065); 
             newFD = 0; 
         }
         const dbt = 2000; 
@@ -404,7 +414,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 newLandLoan.principal = Math.max(0, newLandLoan.principal - (state.landLoan.seasonEmi * 0.7)); 
                 if(newLandLoan.principal === 0) newLandLoan.seasonEmi = 0;
             } else {
-                penaltyDebt = 5000;
+                // Add penalty AND accrue interest on unpaid principal (10% per season)
+                penaltyDebt = 5000 + Math.floor(state.landLoan.principal * 0.1);
                 newLandLoan.missedPayments += 1;
             }
         }
