@@ -81,7 +81,9 @@ export const SummaryScreen = () => {
     };
 
     const persona = calculatePersona();
-    const goldValue = state.bankBalance.goldGrams * 6000;
+    // Use consistent gold rate (₹6000 per gram) - matches bank-screen.tsx
+    const goldRate = 6000;
+    const goldValue = state.bankBalance.goldGrams * goldRate;
     const finalNetWorth = state.savings + state.bankBalance.fixedDeposit + goldValue;
 
     return (
