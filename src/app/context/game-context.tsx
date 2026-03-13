@@ -136,7 +136,7 @@ type Action =
   | { type: "SET_GOAL"; payload: FinancialGoal }
   | { type: "ACHIEVE_GOAL"; payload: { goal: FinancialGoal; isMain: boolean } }
   | { type: "BANK_TRANSACTION"; payload: { type: "DEPOSIT_FD" | "BUY_GOLD" | "SELL_GOLD" | "PAY_LAND_PRINCIPAL"; amount: number; grams?: number; } }
-  | { type: "COMMIT_PLAN"; payload: { crop: Crop; loan: Loan; loanAmount: number; insurance: Insurance; savingsAllocated: number; } }
+  | { type: "COMMIT_PLAN"; payload: { crop: Crop; loan: Loan; loanAmount: number; insurance: Insurance; savingsAllocated: number; cropAllocations?: { cropId: string; acres: number }[]; } }
   | { type: "TRIGGER_EVENT" }
   | { type: "RESOLVE_EVENT_CHOICE"; payload: { cost: number; wellbeing: number; } }
   | { type: "REPAY_LOAN"; payload: { amount: number; type: "FULL" | "PARTIAL" | "DEFAULT"; } }
@@ -293,7 +293,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     }
 
     case "COMMIT_PLAN": {
-      const { crop, loan, insurance, savingsAllocated } = action.payload;
+      const { crop, loan, insurance, savingsAllocated, loanAmount } = action.payload;
       const acres = state.totalAcres;
       
       // Generate dynamic market prices for this season
@@ -358,7 +358,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       const context = {
         season: state.seasonNumber,
         riskExposure: 1 - (state.resilienceScore / 1000), // Higher resilience = lower risk
-        recentEvents: state.eventHistory.slice(-3).map(e => e.id)
+        recentEvents: state.seasonEventsLog.slice(-3)
       };
       const selectedEvent = selectEvent(context);
 
