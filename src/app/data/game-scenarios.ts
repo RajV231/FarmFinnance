@@ -20,6 +20,18 @@ export interface MarketData {
   lastUpdated: string;
 }
 
+export type WeatherCondition = 'SUNNY' | 'CLOUDY' | 'RAINY' | 'STORM' | 'DROUGHT';
+
+export interface WeatherForecast {
+  day: number;
+  condition: WeatherCondition;
+  predictedCondition: WeatherCondition;
+  temperature: number;
+  rainfall: number;
+  accuracy: number;
+  isExtreme: boolean;
+}
+
 export interface GovernmentScheme {
   id: string;
   name: string;

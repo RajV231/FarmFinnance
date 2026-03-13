@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGame } from '../context/game-context';
 import { FileText, ArrowLeft, TrendingUp } from 'lucide-react';
+import { IncomeTrendChart, FinancialInsightCard, RiskExposureMeter } from '../components/financial-charts';
 
 export const ReportsScreen = () => {
   const { state, dispatch } = useGame();
@@ -25,6 +26,36 @@ export const ReportsScreen = () => {
             </div>
         ) : (
             <div className="space-y-4">
+            {/* Financial Insights Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <FinancialInsightCard 
+                    title="Total Savings" 
+                    value={`₹${state.savings.toLocaleString()}`} 
+                    trend={state.savings > 10000 ? 'up' : state.savings > 5000 ? 'neutral' : 'down'}
+                    icon="coins"
+                />
+                <FinancialInsightCard 
+                    title="Outstanding Debt" 
+                    value={`₹${state.debt.toLocaleString()}`} 
+                    trend={state.debt > 20000 ? 'down' : 'up'}
+                    icon="debt"
+                />
+            </div>
+
+            {/* Risk Exposure Meter */}
+            <div className="mb-6">
+                <RiskExposureMeter />
+            </div>
+
+            {/* Income Trend Chart */}
+            {state.history.length >= 2 && (
+                <div className="mb-6">
+                    <IncomeTrendChart />
+                </div>
+            )}
+
+            {/* Season History */}
+            <h3 className="text-lg font-bold text-gray-700 mb-3">Season History</h3>
                 {state.history.map((record, idx) => (
                     <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border-l-4 border-game-primary">
                         <div className="flex justify-between items-center mb-2">

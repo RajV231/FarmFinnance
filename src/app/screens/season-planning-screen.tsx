@@ -1,11 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useGame } from '../context/game-context';
-import { CROPS, LOANS, INSURANCES, GOVERNMENT_SCHEMES } from '../data/game-scenarios';
-import { Shield, Coins, Ruler, AlertTriangle, ArrowLeft, TrendingUp, TrendingDown, Info, BarChart3 } from 'lucide-react';
+import { CROPS, LOANS, INSURANCES, GOVERNMENT_SCHEMES, MANDIS } from '../data/game-scenarios';
+import { Shield, Coins, Ruler, AlertTriangle, ArrowLeft, TrendingUp, TrendingDown, Info, BarChart3, Calendar as CalendarIcon, Plus, X } from 'lucide-react';
 import clsx from 'clsx';
 import { FarmVisualizer } from '../components/farm-visualizer';
 import { EducationPopup, useEducationTip } from '../components/education-popup';
 import { MarketPricesModal, useMarketModal } from '../components/market-prices-modal';
+import { SeasonalCalendarView } from '../components/seasonal-calendar';
+import { CropDiversificationPanel, RiskExposureMeter } from '../components/financial-charts';
+
+interface CropAllocation {
+  cropId: string;
+  acres: number;
+}
 
 export const SeasonPlanningScreen = () => {
   const { dispatch, state } = useGame();
@@ -22,16 +29,78 @@ export const SeasonPlanningScreen = () => {
     return CROPS.filter(c => c.type === targetType);
   }, [state.farmType]);
 
-  const [cropId, setCropId] = useState(availableCrops[0]?.id || CROPS[0].id);
+  // Phase 2: Crop Diversification State
+  const [cropAllocations, setCropAllocations] = useState<CropAllocation[]>([
+    { cropId: availableCrops[0]?.id || CROPS[0].id, acres: acres }
+  ]);
   const [loanId, setLoanId] = useState<string | null>(null);
   const [loanAmount, setLoanAmount] = useState(0);
   const [hasInsurance, setInsurance] = useState(false);
   const [savingsAlloc, setSavingsAlloc] = useState(Math.min(5000, state.savings));
 
-  const selectedCrop = CROPS.find(c => c.id === cropId)!;
+  // Update allocations when acres change
+  useEffect(() => {
+    if (cropAllocations.length === 1) {
+      setCropAllocations([{ cropId: cropAllocations[0].cropId, acres: acres }]);
+    }
+  }, [acres]);
+
+  const handleAddCrop = () => {
+    if (cropAllocations.length >= 3) return;
+    const unallocatedAcres = acres - cropAllocations.reduce((sum, a) => sum + a.acres, 0);
+    if (unallocatedAcres <= 0) return;
+    
+    setCropAllocations([
+      ...cropAllocations,
+      { cropId: availableCrops[0]?.id || CROPS[0].id, acres: Math.max(0.5, unallocatedAcres / 2) }
+    ]);
+  };
+
+  const handleRemoveCrop = (index: number) => {
+    if (cropAllocations.length <= 1) return;
+    const removed = cropAllocations[index];
+    const newAllocations = cropAllocations.filter((_, i) => i !== index);
+    // Redistribute acres to first crop
+    newAllocations[0].acres += removed.acres;
+    setCropAllocations(newAllocations);
+  };
+
+  const handleCropChange = (index: number, newCropId: string) => {
+    const newAllocations = [...cropAllocations];
+    newAllocations[index].cropId = newCropId;
+    setCropAllocations(newAllocations);
+  };
+
+  const handleAcreageChange = (index: number, newAcres: number) => {
+    const newAllocations = [...cropAllocations];
+    const oldAcres = newAllocations[index].acres;
+    const diff = newAcres - oldAcres;
+    
+    // Adjust the last allocation to balance
+    if (index < newAllocations.length - 1) {
+      newAllocations[newAllocations.length - 1].acres = Math.max(0.5, newAllocations[newAllocations.length - 1].acres - diff);
+    }
+    newAllocations[index].acres = newAcres;
+    
+    // Ensure total doesn't exceed available acres
+    const total = newAllocations.reduce((sum, a) => sum + a.acres, 0);
+    if (total > acres) {
+      const ratio = acres / total;
+      newAllocations.forEach(a => a.acres = Math.max(0.5, a.acres * ratio));
+    }
+    
+    setCropAllocations(newAllocations);
+  };
+
+  const selectedCrop = CROPS.find(c => c.id === cropAllocations[0].cropId)!;
   const selectedLoan = loanId ? LOANS.find(l => l.id === loanId)! : LOANS[0];
 
-  const totalSeedCost = selectedCrop.costPerAcre * acres;
+  // Calculate total costs with diversification
+  const totalSeedCost = cropAllocations.reduce((sum, alloc) => {
+    const crop = CROPS.find(c => c.id === alloc.cropId)!;
+    return sum + (crop.costPerAcre * alloc.acres);
+  }, 0);
+  
   const insuranceCost = hasInsurance ? (INSURANCES[1].premium * acres) : 0;
   const totalUpfrontCost = totalSeedCost + insuranceCost;
 
@@ -40,7 +109,7 @@ export const SeasonPlanningScreen = () => {
     if (selectedCrop.riskFactor > 0.7) {
       educationTip.showTip('high_risk_crop_selected');
     }
-  }, [cropId]);
+  }, [cropAllocations]);
 
   useEffect(() => {
     if (!loanId && totalUpfrontCost > state.savings) {
@@ -60,6 +129,8 @@ export const SeasonPlanningScreen = () => {
         alert(`Insufficient Funds! You need ₹${totalUpfrontCost.toLocaleString()} for ${acres} acres. Increase Loan or Savings.`);
         return;
     }
+    
+    // For backward compatibility, use first crop as primary
     dispatch({
         type: 'COMMIT_PLAN',
         payload: {
@@ -67,7 +138,8 @@ export const SeasonPlanningScreen = () => {
             loan: selectedLoan,
             loanAmount: loanId ? loanAmount : 0,
             insurance: hasInsurance ? INSURANCES[1] : INSURANCES[0],
-            savingsAllocated: savingsAlloc
+            savingsAllocated: savingsAlloc,
+            cropAllocations: cropAllocations // Pass diversification data
         }
     });
   };
@@ -101,8 +173,81 @@ export const SeasonPlanningScreen = () => {
 
             <div className="md:grid md:grid-cols-2 md:gap-6">
                 
-                {/* 1. Crop Selection */}
+                {/* Phase 2: Crop Diversification Panel */}
                 <section className="mb-6 bg-white p-4 rounded-xl shadow-sm md:col-span-2">
+                    <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4" />
+                            Crop Diversification (Max 3 crops)
+                        </h3>
+                        {cropAllocations.length < 3 && (
+                            <button
+                                onClick={handleAddCrop}
+                                className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-medium hover:bg-green-200 transition-colors"
+                            >
+                                <Plus className="w-3 h-3" />
+                                Add Crop
+                            </button>
+                        )}
+                    </div>
+                    
+                    <div className="space-y-3">
+                        {cropAllocations.map((alloc, index) => (
+                            <div key={index} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-xs font-bold text-gray-500">Crop {index + 1}</span>
+                                    {cropAllocations.length > 1 && (
+                                        <button
+                                            onClick={() => handleRemoveCrop(index)}
+                                            className="p-1 hover:bg-red-100 rounded-full text-red-500"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <select
+                                        value={alloc.cropId}
+                                        onChange={(e) => handleCropChange(index, e.target.value)}
+                                        className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                                    >
+                                        {availableCrops.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
+                                    </select>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="number"
+                                            min="0.5"
+                                            max={acres}
+                                            step="0.5"
+                                            value={alloc.acres.toFixed(1)}
+                                            onChange={(e) => handleAcreageChange(index, parseFloat(e.target.value))}
+                                            className="text-sm border border-gray-300 rounded px-2 py-1 w-20"
+                                        />
+                                        <span className="text-xs text-gray-500">acres</span>
+                                    </div>
+                                </div>
+                                <div className="mt-2 text-xs text-gray-600">
+                                    Cost: ₹{(CROPS.find(c => c.id === alloc.cropId)?.costPerAcre || 0) * alloc.acres | 0}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <div className="mt-3 flex justify-between items-center text-xs">
+                        <span className="text-gray-600">Total Allocated: {cropAllocations.reduce((sum, a) => sum + a.acres, 0).toFixed(1)} / {acres.toFixed(1)} acres</span>
+                        <span className={clsx(
+                            "font-bold",
+                            cropAllocations.reduce((sum, a) => sum + a.acres, 0) > acres ? "text-red-600" : "text-green-600"
+                        )}>
+                            {((cropAllocations.reduce((sum, a) => sum + a.acres, 0) / acres) * 100).toFixed(0)}%
+                        </span>
+                    </div>
+                </section>
+
+                {/* 1. Crop Selection (Legacy - Single Crop Mode) */}
+                <section className="mb-6 bg-white p-4 rounded-xl shadow-sm md:col-span-2 hidden">
                     <div className="flex justify-between items-center mb-3">
                         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Select Crop</h3>
                         {state.marketPrices.length > 0 && (
@@ -121,10 +266,10 @@ export const SeasonPlanningScreen = () => {
                             return (
                                 <button
                                     key={c.id}
-                                    onClick={() => setCropId(c.id)}
+                                    onClick={() => {}}
                                     className={clsx(
                                         "p-3 rounded-lg border text-left transition-all hover:shadow-md flex flex-col justify-between",
-                                        cropId === c.id ? "border-game-primary bg-green-50 ring-2 ring-game-primary" : "border-gray-100"
+                                        "border-gray-100"
                                     )}
                                 >
                                     <div>
@@ -305,6 +450,11 @@ export const SeasonPlanningScreen = () => {
         {marketModal.isOpen && (
             <MarketPricesModal onClose={marketModal.closeModal} />
         )}
+
+        {/* Seasonal Calendar View - Integrated into Planning Screen */}
+        <div className="p-4 md:p-8 pt-0">
+            <SeasonalCalendarView />
+        </div>
     </div>
   );
 };

@@ -1,7 +1,10 @@
 import React from 'react';
 import { useGame } from '../context/game-context';
-import { Sprout, User, FileText, ShoppingCart, Target, Landmark, LogOut } from 'lucide-react';
+import { Sprout, User, FileText, ShoppingCart, Target, Landmark, LogOut, Building2, Calendar, MessageCircle } from 'lucide-react';
 import { FarmVisualizer } from '../components/farm-visualizer';
+import { SchemesDashboard } from '../components/schemes-dashboard';
+import { SeasonalCalendarView } from '../components/seasonal-calendar';
+import { AdvisorBot } from '../components/advisor-bot';
 
 export const DashboardScreen = () => {
   const { state, dispatch } = useGame();
@@ -26,6 +29,21 @@ export const DashboardScreen = () => {
                  <div className="text-gray-500 text-xs font-bold uppercase">Season</div>
                  <div className="font-mono font-bold text-2xl text-game-primary">{state.seasonNumber}/{state.maxSeasons}</div>
             </div>
+        </div>
+
+        {/* Government Schemes Dashboard */}
+        <div className="mb-6">
+            <SchemesDashboard />
+        </div>
+
+        {/* Seasonal Calendar View */}
+        <div className="mb-6">
+            <SeasonalCalendarView />
+        </div>
+
+        {/* AI Advisor Bot - Krishi Mitra */}
+        <div className="mb-6">
+            <AdvisorBot />
         </div>
 
         <div className="space-y-3 mb-20 md:mb-0 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">

@@ -1,21 +1,59 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/game-context';
-import { X, TrendingUp, TrendingDown, Minus, Info, Sprout } from 'lucide-react';
-import { MarketData, Crop, CROPS } from '../data/game-scenarios';
+import { X, TrendingUp, TrendingDown, Minus, Info, Sprout, MapPin, Truck } from 'lucide-react';
+import { MarketData, Crop, CROPS, MANDIS } from '../data/game-scenarios';
 import { getMarketInsights, getPriceHistory, getAveragePrice } from '../engine/market-engine';
+import clsx from 'clsx';
 
 interface MarketPricesModalProps {
   onClose: () => void;
 }
 
+interface MandiPrice {
+  mandiId: string;
+  mandiName: string;
+  distance: number;
+  baseDiscount: number;
+  currentPrice: number;
+  transportCost: number;
+  netPrice: number;
+  trend: 'UP' | 'DOWN' | 'STABLE';
+  priceChange: number;
+}
+
 export const MarketPricesModal: React.FC<MarketPricesModalProps> = ({ onClose }) => {
   const { state } = useGame();
   const [selectedCrop, setSelectedCrop] = useState<Crop | null>(null);
+  const [selectedMandi, setSelectedMandi] = useState<string>('district_mandi');
 
   // Use current season's market prices or generate fallback
   const marketPrices: MarketData[] = state.marketPrices.length > 0 
     ? state.marketPrices 
     : [];
+
+  // Calculate mandi-specific prices for selected crop
+  const getMandiPrices = (cropId: string): MandiPrice[] => {
+    const basePriceData = marketPrices.find(p => p.cropId === cropId);
+    if (!basePriceData) return [];
+
+    return MANDIS.map(mandi => {
+      const currentPrice = basePriceData.currentPrice * mandi.baseDiscount;
+      const transportCost = mandi.distance * 2; // ₹2 per km round trip
+      const netPrice = currentPrice - transportCost;
+      
+      return {
+        mandiId: mandi.id,
+        mandiName: mandi.name,
+        distance: mandi.distance,
+        baseDiscount: mandi.baseDiscount,
+        currentPrice,
+        transportCost,
+        netPrice,
+        trend: basePriceData.trend,
+        priceChange: basePriceData.priceChange
+      };
+    });
+  };
 
   const getCropDetails = (cropId: string) => {
     return CROPS.find(c => c.id === cropId) || null;
@@ -124,10 +162,10 @@ export const MarketPricesModal: React.FC<MarketPricesModalProps> = ({ onClose })
                       </div>
                     </div>
 
-                    {/* Expanded Details */}
+                    {/* Expanded Details with Multi-Mandi Comparison */}
                     {selectedCrop?.id === priceData.cropId && (
                       <div className="mt-4 pt-4 border-t border-gray-200 animate-fade-in">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                           <div>
                             <span className="text-gray-500 block text-xs">Base Price</span>
                             <span className="font-semibold">{formatCurrency(priceData.basePrice)}</span>
@@ -154,10 +192,92 @@ export const MarketPricesModal: React.FC<MarketPricesModalProps> = ({ onClose })
                         </div>
                         
                         {/* Market Insight */}
-                        <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
                           <p className="text-xs text-blue-700 font-medium">
                             💡 {getMarketInsights(priceData.cropId)}
                           </p>
+                        </div>
+
+                        {/* Multi-Mandi Price Comparison */}
+                        <div className="mt-4">
+                          <h4 className="font-bold text-sm text-gray-700 mb-3 flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            Compare Prices Across Mandis
+                          </h4>
+                          <div className="space-y-2">
+                            {getMandiPrices(priceData.cropId).map((mandiPrice) => (
+                              <button
+                                key={mandiPrice.mandiId}
+                                onClick={() => setSelectedMandi(mandiPrice.mandiId)}
+                                className={clsx(
+                                  "w-full p-3 rounded-lg border transition-all hover:shadow-md",
+                                  selectedMandi === mandiPrice.mandiId
+                                    ? "border-game-primary bg-green-50 ring-2 ring-game-primary/20"
+                                    : "border-gray-200 hover:border-game-primary/50"
+                                )}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div className={clsx("p-2 rounded-lg", 
+                                      mandiPrice.netPrice >= priceData.currentPrice 
+                                        ? "bg-green-100 text-green-700" 
+                                        : "bg-orange-100 text-orange-700"
+                                    )}>
+                                      <MapPin className="w-4 h-4" />
+                                    </div>
+                                    <div className="text-left">
+                                      <div className="font-bold text-sm text-gray-800">{mandiPrice.mandiName}</div>
+                                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                                        <span className="flex items-center gap-1">
+                                          <Truck className="w-3 h-3" />
+                                          {mandiPrice.distance} km
+                                        </span>
+                                        <span>•</span>
+                                        <span className={mandiPrice.transportCost > 50 ? "text-red-600" : "text-gray-500"}>
+                                          Transport: ₹{mandiPrice.transportCost}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-lg font-bold text-gray-800">
+                                      {formatCurrency(Math.round(mandiPrice.currentPrice))}
+                                    </div>
+                                    <div className={clsx("text-xs font-bold", 
+                                      mandiPrice.netPrice >= priceData.currentPrice 
+                                        ? "text-green-600" 
+                                        : "text-orange-600"
+                                    )}>
+                                      Net: {formatCurrency(Math.round(mandiPrice.netPrice))}
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          
+                          {/* Best Mandi Recommendation */}
+                          {(() => {
+                            const mandiPrices = getMandiPrices(priceData.cropId);
+                            const bestMandi = mandiPrices.reduce((best, current) => 
+                              current.netPrice > best.netPrice ? current : best
+                            );
+                            return (
+                              <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div className="flex items-start gap-2">
+                                  <TrendingUp className="w-4 h-4 text-green-600 mt-0.5" />
+                                  <div>
+                                    <p className="text-xs font-bold text-green-800">
+                                      Best Option: {bestMandi.mandiName}
+                                    </p>
+                                    <p className="text-xs text-green-700">
+                                      You'll earn {formatCurrency(Math.round(bestMandi.netPrice - priceData.currentPrice))} more per unit after transport costs!
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     )}

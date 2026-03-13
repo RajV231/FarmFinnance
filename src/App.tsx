@@ -15,7 +15,8 @@ import { ReportsScreen } from './app/screens/reports-screen';
 import { ShopScreen } from './app/screens/shop-screen';
 import { GoalSelectionScreen } from './app/screens/goal-selection-screen';
 import { BankScreen } from './app/screens/bank-screen';
-import { GoalsScreen } from './app/screens/goals-screen'; 
+import { GoalsScreen } from './app/screens/goals-screen';
+import { AdvisorBot } from './app/components/advisor-bot';
 
 const ScreenRouter = () => {
   const { state } = useGame();
@@ -60,6 +61,11 @@ const ScreenRouter = () => {
                 <div className="flex items-center justify-center h-full text-red-500 font-bold">
                     Unknown Phase: {state.phase}
                 </div>
+            )}
+            
+            {/* Advisor Bot - Available on Dashboard and Planning screens */}
+            {(state.phase === 'DASHBOARD' || state.phase === 'PLANNING' || state.phase === 'BANK' || state.phase === 'GOALS') && (
+                <AdvisorBot />
             )}
         </div>
     </div>
