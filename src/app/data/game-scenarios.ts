@@ -10,6 +10,27 @@ export interface Crop {
   waterReq: 'LOW' | 'MED' | 'HIGH';
 }
 
+export interface MarketData {
+  cropId: string;
+  currentPrice: number;
+  basePrice: number;
+  priceChange: number; // Percentage change from base
+  trend: 'UP' | 'DOWN' | 'STABLE';
+  mandiName: string;
+  lastUpdated: string;
+}
+
+export interface GovernmentScheme {
+  id: string;
+  name: string;
+  description: string;
+  benefitAmount: number;
+  eligibility: string[];
+  category: 'INCOME_SUPPORT' | 'INSURANCE_SUBSIDY' | 'LOAN_BENEFIT' | 'ASSET_SUBSIDY';
+  isActive: boolean;
+  dbtEnabled: boolean;
+}
+
 export interface Asset {
   id: string;
   name: string;
@@ -104,6 +125,67 @@ export const LOANS: Loan[] = [
 export const INSURANCES: Insurance[] = [
   { id: 'none', name: 'No Insurance', premium: 0, coverage: 0 },
   { id: 'standard', name: 'PMFBY Insurance', premium: 1800, coverage: 0.8 },
+];
+
+// Government Schemes Data - Phase 1 Implementation
+export const GOVERNMENT_SCHEMES: GovernmentScheme[] = [
+  { 
+    id: 'pm_kisan', 
+    name: 'PM-KISAN', 
+    description: 'Income support of ₹6,000 per year in 3 installments',
+    benefitAmount: 2000,
+    eligibility: ['SMALL_FARMER', 'MARGINAL_FARMER'],
+    category: 'INCOME_SUPPORT',
+    isActive: true,
+    dbtEnabled: true
+  },
+  {
+    id: 'pmfby_subsidy',
+    name: 'PMFBY Subsidy',
+    description: '90% subsidy on crop insurance premium for small farmers',
+    benefitAmount: 1620, // 90% of 1800 premium
+    eligibility: ['SMALL_FARMER', 'MARGINAL_FARMER'],
+    category: 'INSURANCE_SUBSIDY',
+    isActive: true,
+    dbtEnabled: true
+  },
+  {
+    id: 'kcc_interest',
+    name: 'KCC Interest Subvention',
+    description: '2% interest subvention on Kisan Credit Card loans',
+    benefitAmount: 0, // Calculated dynamically based on loan amount
+    eligibility: ['KCC_HOLDER'],
+    category: 'LOAN_BENEFIT',
+    isActive: true,
+    dbtEnabled: false
+  },
+  {
+    id: 'drip_subsidy',
+    name: 'Micro Irrigation Subsidy',
+    description: '55% subsidy on drip irrigation system installation',
+    benefitAmount: 24750, // 55% of 45000
+    eligibility: ['SMALL_FARMER'],
+    category: 'ASSET_SUBSIDY',
+    isActive: true,
+    dbtEnabled: true
+  },
+  {
+    id: 'solar_pump_subsidy',
+    name: 'Solar Pump Subsidy (PM-KUSUM)',
+    description: '60% subsidy on solar water pump under PM-KUSUM scheme',
+    benefitAmount: 72000, // 60% of 120000
+    eligibility: ['SMALL_FARMER', 'MARGINAL_FARMER'],
+    category: 'ASSET_SUBSIDY',
+    isActive: true,
+    dbtEnabled: true
+  }
+];
+
+// Market Mandis for Dynamic Pricing
+export const MANDIS = [
+  { id: 'local_mandi', name: 'Local APMC Mandi', distance: 15, baseDiscount: 0.95 },
+  { id: 'district_mandi', name: 'District Main Mandi', distance: 45, baseDiscount: 1.0 },
+  { id: 'state_mandi', name: 'State Agricultural Market', distance: 120, baseDiscount: 1.05 }
 ];
 export interface GameEvent {
   id: string;
