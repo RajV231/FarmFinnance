@@ -1,6 +1,6 @@
 import React from 'react';
 import { GameProvider, useGame, GamePhase } from './app/context/game-context';
-import { LanguageProvider } from './app/context/language-context';
+import { LanguageProvider, useLanguage } from './app/context/language-context'; // IMPORT HOOK
 
 import { LanguageScreen } from './app/screens/language-screen';
 import { FarmSetupScreen } from './app/screens/farm-setup-screen';
@@ -21,14 +21,14 @@ import { MarketScreen } from './app/screens/market-screen';
 
 const ScreenRouter = () => {
   const { state } = useGame();
+  const { t } = useLanguage(); // NEW: Hook into dictionary
 
-  // FIX: Restored the original Splash Screen design
   if (state.phase === 'SPLASH') {
     return (
         <div className="h-full flex flex-col items-center justify-center bg-game-bg animate-fade-in min-h-screen">
             <div className="text-8xl mb-6">🌱</div>
-            <h1 className="text-4xl md:text-6xl font-bold text-game-primary mb-4">KrishiNiti</h1>
-            <p className="text-gray-500 text-xl">Farming & Finance Game</p>
+            <h1 className="text-4xl md:text-6xl font-bold text-game-primary mb-4">{t('app_title')}</h1>
+            <p className="text-gray-500 text-xl">{t('splash_subtitle')}</p>
         </div>
     );
   }
@@ -62,7 +62,7 @@ const ScreenRouter = () => {
         <div className="w-full md:max-w-4xl bg-game-bg md:bg-white md:shadow-2xl md:rounded-2xl overflow-hidden min-h-screen md:min-h-[800px] flex flex-col relative">
             {screens[state.phase] || (
                 <div className="flex items-center justify-center h-full text-red-500 font-bold">
-                    Unknown Phase: {state.phase}
+                    {t('unknown_phase')}: {state.phase}
                 </div>
             )}
         </div>

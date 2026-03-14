@@ -1,13 +1,21 @@
 import React from 'react';
 import { useGame } from '../context/game-context';
+import { useLanguage } from '../context/language-context';
 import { getAdvisorTip } from '../engine/advisor-engine';
 import { Bot, Sparkles } from 'lucide-react';
 
 export const AdvisorBot = () => {
     const { state } = useGame();
+    const { t } = useLanguage();
     
-    // Fetch the dynamic tip based on the current game state
+    // Engine now returns { key: string, val?: number }
     const tip = getAdvisorTip(state);
+    
+    // We fetch the translated string, and replace {val} if the engine passed a number!
+    let translatedTip = t(tip.key);
+    if (tip.val !== undefined) {
+        translatedTip = translatedTip.replace('{val}', tip.val.toLocaleString());
+    }
 
     return (
         <div className="bg-gradient-to-r from-emerald-800 to-green-700 rounded-2xl p-4 shadow-lg mb-6 flex items-start gap-4 text-white animate-fade-in border border-green-600">
@@ -16,10 +24,10 @@ export const AdvisorBot = () => {
             </div>
             <div>
                 <h3 className="font-bold text-sm text-green-100 mb-1 flex items-center gap-1.5 uppercase tracking-wider">
-                    <Sparkles className="w-3 h-3" /> Krishi Mitra Advisory
+                    <Sparkles className="w-3 h-3" /> {t('advisory')} 
                 </h3>
                 <p className="text-sm leading-relaxed text-white/95 font-medium">
-                    {tip}
+                    {translatedTip}
                 </p>
             </div>
         </div>

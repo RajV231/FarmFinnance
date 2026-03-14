@@ -1,52 +1,52 @@
 export interface QuizQuestion {
     id: string;
-    question: string;
-    options: string[];
+    questionKey: string;
+    optionsKeys: string[];
     correctIndex: number;
     reward: number;
-    explanation: string;
+    explanationKey: string;
 }
 
 export const QUIZZES: QuizQuestion[] = [
     {
         id: 'q_kcc',
-        question: "What is the primary benefit of the Kisan Credit Card (KCC)?",
-        options: ["Free tractor subsidies", "Low-interest farming loans", "Free weather updates", "Guaranteed market prices"],
+        questionKey: "quiz_kcc_q",
+        optionsKeys: ["quiz_kcc_o1", "quiz_kcc_o2", "quiz_kcc_o3", "quiz_kcc_o4"],
         correctIndex: 1,
         reward: 500,
-        explanation: "KCC provides farmers with timely and adequate credit at very low interest rates (around 7%) compared to moneylenders."
+        explanationKey: "quiz_kcc_exp"
     },
     {
         id: 'q_pmfby',
-        question: "What does the PMFBY (Pradhan Mantri Fasal Bima Yojana) scheme protect you against?",
-        options: ["Theft of farm equipment", "Crop loss due to natural calamities", "Medical emergencies", "Market price drops"],
+        questionKey: "quiz_pmfby_q",
+        optionsKeys: ["quiz_pmfby_o1", "quiz_pmfby_o2", "quiz_pmfby_o3", "quiz_pmfby_o4"],
         correctIndex: 1,
         reward: 500,
-        explanation: "PMFBY is the government's flagship crop insurance scheme that financially protects farmers if crops are destroyed by weather or pests."
+        explanationKey: "quiz_pmfby_exp"
     },
     {
         id: 'q_compound',
-        question: "Why is a local Moneylender's 36% interest rate extremely dangerous?",
-        options: ["They require too much paperwork", "Debt grows exponentially faster, leading to a debt trap", "They give loans in cash only", "There is no difference from a bank"],
+        questionKey: "quiz_compound_q",
+        optionsKeys: ["quiz_compound_o1", "quiz_compound_o2", "quiz_compound_o3", "quiz_compound_o4"],
         correctIndex: 1,
         reward: 1000,
-        explanation: "High-interest loans compound rapidly. A ₹10,000 loan at 36% becomes unpayable much faster than a standard 7% bank loan, often trapping farmers in permanent debt."
+        explanationKey: "quiz_compound_exp"
     },
     {
         id: 'q_diversify',
-        question: "What is 'Crop Diversification' in financial terms?",
-        options: ["Planting only one high-value crop every year", "Growing different types of crops to spread out risk", "Selling crops to different mandis", "Using multiple types of chemical fertilizers"],
+        questionKey: "quiz_div_q",
+        optionsKeys: ["quiz_div_o1", "quiz_div_o2", "quiz_div_o3", "quiz_div_o4"],
         correctIndex: 1,
         reward: 500,
-        explanation: "Growing different crops ensures that if one fails due to disease or weather, the others might still survive. It is the farming equivalent of 'don't put all your eggs in one basket'."
+        explanationKey: "quiz_div_exp"
     },
     {
         id: 'q_inflation',
-        question: "Why is keeping all your savings as cash in a box at home a bad idea?",
-        options: ["Cash loses value over time due to inflation", "The bank will charge you a fee", "You cannot use cash to buy seeds", "It is bad luck"],
+        questionKey: "quiz_inf_q",
+        optionsKeys: ["quiz_inf_o1", "quiz_inf_o2", "quiz_inf_o3", "quiz_inf_o4"],
         correctIndex: 0,
         reward: 800,
-        explanation: "Inflation means things get more expensive over time. ₹1,000 today buys less than it did 5 years ago. Putting money in a Fixed Deposit (FD) helps it grow to beat inflation."
+        explanationKey: "quiz_inf_exp"
     }
 ];
 

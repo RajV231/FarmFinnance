@@ -23,7 +23,7 @@ export const Header = () => {
           <button 
             onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
             className="p-2 hover:bg-earth-800 rounded-full transition"
-            aria-label="Switch Language"
+            aria-label={t('ui_switch_lang')}
           >
             <Globe className="w-5 h-5" />
           </button>
@@ -31,7 +31,7 @@ export const Header = () => {
           <button 
             onClick={() => dispatch({ type: 'RESET_GAME' })}
             className="p-2 hover:bg-earth-800 rounded-full transition"
-            aria-label="Restart Game"
+            aria-label={t('ui_restart_game')}
           >
             <RefreshCw className="w-5 h-5" />
           </button>
@@ -41,15 +41,15 @@ export const Header = () => {
       {/* Status Bar */}
       <div className="max-w-4xl mx-auto mt-4 grid grid-cols-3 gap-2 text-sm">
         <div className="bg-earth-800 p-2 rounded text-center">
-          <div className="text-earth-100 opacity-75">{t('savings')}</div>
+          <div className="text-earth-100 opacity-75">{t('header_savings')}</div>
           <div className="font-mono font-bold">₹{state.savings.toLocaleString()}</div>
         </div>
         <div className="bg-earth-800 p-2 rounded text-center">
-          <div className="text-earth-100 opacity-75">{t('debt')}</div>
+          <div className="text-earth-100 opacity-75">{t('header_debt')}</div>
           <div className="font-mono font-bold text-red-300">₹{state.debt.toLocaleString()}</div>
         </div>
         <div className="bg-earth-800 p-2 rounded text-center">
-          <div className="text-earth-100 opacity-75">{t('wellbeing')}</div>
+          <div className="text-earth-100 opacity-75">{t('header_wellbeing')}</div>
           <div className="font-mono font-bold text-green-300">{state.wellbeing}%</div>
         </div>
       </div>

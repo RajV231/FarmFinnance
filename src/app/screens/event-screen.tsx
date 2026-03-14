@@ -1,17 +1,19 @@
 import React, { useEffect } from 'react';
 import { useGame } from '../context/game-context';
+import { useLanguage } from '../context/language-context'; // NEW
 import { CloudRain, AlertTriangle, TrendingDown, Bug, HeartPulse, Tractor } from 'lucide-react';
-import { FarmVisualizer } from '../components/farm-visualizer'; // IMPORT
+import { FarmVisualizer } from '../components/farm-visualizer';
 import { SpeakerButton } from '../components/speaker-button';
 
 export const EventScreen = () => {
   const { state, dispatch } = useGame();
+  const { t } = useLanguage(); // NEW
   
   useEffect(() => {
     if (!state.currentEvent) dispatch({ type: 'TRIGGER_EVENT' });
   }, [state.phase]);
 
-  if (!state.currentEvent) return <div className="p-10 text-center animate-pulse">Scanning Fields...</div>;
+  if (!state.currentEvent) return <div className="p-10 text-center animate-pulse">{t('ui_scanning')}</div>;
 
   const evt = state.currentEvent;
   const isShock = evt.type === 'SHOCK' || evt.type === 'MARKET';
@@ -35,70 +37,55 @@ export const EventScreen = () => {
       return 0;
   };
   const phaseIdx = getPhaseIndex();
-  const textToRead = `${evt.titleKey}. ${evt.descKey}. What will you do? Option A: ${evt.choiceA.label}, cost ${evt.choiceA.cost} rupees. Option B: ${evt.choiceB.label}, cost ${evt.choiceB.cost} rupees.`;
+  
+  // TTS reads the translated text!
+  const textToRead = `${t(evt.titleKey)}. ${t(evt.descKey)}. ${t('ui_what_do')} Option A: ${t(evt.choiceA.labelKey)}, cost ${evt.choiceA.cost}. Option B: ${t(evt.choiceB.labelKey)}, cost ${evt.choiceB.cost}.`;
 
   return (
     <div className={`h-full flex flex-col bg-game-bg animate-fade-in overflow-y-auto`}>
-      
-      {/* 1. VISUALIZER AT THE TOP */}
       <div className="p-4 pb-0">
         <FarmVisualizer state={state} />
       </div>
 
       <div className="p-6">
-        {/* Timeline Visual */}
         <div className="flex items-center justify-center gap-2 mb-6">
             {[1, 2, 3].map(step => (
                 <div key={step} className={`h-2 w-16 rounded-full transition-colors ${step <= phaseIdx ? 'bg-game-primary' : 'bg-gray-200'}`} />
             ))}
         </div>
         <div className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">
-            Stage {phaseIdx} of 3
+            {t('ui_stage')} {phaseIdx} {t('ui_of')} 3
         </div>
         
-        {/* Event Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 relative"> 
-            {/* ADD SPEAKER BUTTON HERE */}
             <div className="absolute top-4 right-4 z-10">
                 <SpeakerButton text={textToRead} />
             </div>
             <div className={`p-6 flex flex-col items-center text-center ${isShock ? 'bg-red-100' : 'bg-blue-50'}`}>
                 {getIcon()}
-                <h2 className="text-2xl font-bold mb-2">{evt.titleKey}</h2>
-                <p className="text-gray-600">{evt.descKey}</p>
+                <h2 className="text-2xl font-bold mb-2">{t(evt.titleKey)}</h2>
+                <p className="text-gray-600">{t(evt.descKey)}</p>
             </div>
         </div>
 
-        {/* Choices */}
         <div className="space-y-4 pb-10">
-            <h3 className="text-center font-bold text-gray-700">What will you do?</h3>
+            <h3 className="text-center font-bold text-gray-700">{t('ui_what_do')}</h3>
             
             <button 
-                onClick={() => dispatch({ 
-                    type: 'RESOLVE_EVENT_CHOICE', 
-                    payload: { 
-                        cost: evt.choiceA.cost, 
-                        wellbeing: evt.choiceA.mitigatedWellbeing || 0 
-                    } 
-                })}
+                onClick={() => dispatch({ type: 'RESOLVE_EVENT_CHOICE', payload: { cost: evt.choiceA.cost, wellbeing: evt.choiceA.mitigatedWellbeing || 0 } })}
                 className="w-full py-4 rounded-xl font-bold text-white shadow-md text-left px-6 flex justify-between bg-game-primary hover:bg-game-primaryDark transition-all active:scale-95"
             >
-                <span>{evt.choiceA.label}</span>
-                <span className="opacity-90 bg-black/20 px-2 py-1 rounded text-sm">
-                    -₹{evt.choiceA.cost}
-                </span>
+                <span>{t(evt.choiceA.labelKey)}</span>
+                <span className="opacity-90 bg-black/20 px-2 py-1 rounded text-sm">-₹{evt.choiceA.cost}</span>
             </button>
 
             <button 
-                onClick={() => dispatch({ 
-                    type: 'RESOLVE_EVENT_CHOICE', 
-                    payload: { cost: evt.choiceB.cost, wellbeing: 0 } 
-                })}
+                onClick={() => dispatch({ type: 'RESOLVE_EVENT_CHOICE', payload: { cost: evt.choiceB.cost, wellbeing: 0 } })}
                 className="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold shadow-sm text-left px-6 flex justify-between hover:bg-gray-50 active:scale-95"
             >
-                <span>{evt.choiceB.label}</span>
+                <span>{t(evt.choiceB.labelKey)}</span>
                 <span className="text-sm text-gray-400">
-                    {evt.choiceB.cost > 0 ? `-₹${evt.choiceB.cost}` : 'Free'}
+                    {evt.choiceB.cost > 0 ? `-₹${evt.choiceB.cost}` : t('ui_free')}
                 </span>
             </button>
         </div>

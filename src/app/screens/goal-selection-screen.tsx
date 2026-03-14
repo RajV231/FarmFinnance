@@ -1,10 +1,12 @@
 import React from 'react';
 import { useGame } from '../context/game-context';
-import { GOALS, FinancialGoal } from '../data/game-scenarios'; // CORRECT IMPORT
+import { useLanguage } from '../context/language-context'; // NEW
+import { GOALS, FinancialGoal } from '../data/game-scenarios'; 
 import { Home, GraduationCap, Tractor, Target, Heart } from 'lucide-react';
 
 export const GoalSelectionScreen = () => {
     const { dispatch } = useGame();
+    const { t } = useLanguage(); // NEW
 
     const getIcon = (id: string) => {
         if(id.includes('education')) return <GraduationCap className="text-green-700 w-6 h-6" />;
@@ -16,8 +18,8 @@ export const GoalSelectionScreen = () => {
 
     return (
         <div className="h-full bg-game-bg p-6 flex flex-col justify-center animate-slide-up">
-            <h1 className="text-3xl font-bold text-game-primary mb-2 text-center">What is your Dream?</h1>
-            <p className="text-gray-500 text-center mb-8">Financial literacy helps you achieve life goals.</p>
+            <h1 className="text-3xl font-bold text-game-primary mb-2 text-center">{t('goal_sel_title')}</h1>
+            <p className="text-gray-500 text-center mb-8">{t('goal_sel_subtitle')}</p>
 
             <div className="space-y-4">
                 {GOALS.map((goal: FinancialGoal) => (
@@ -30,9 +32,9 @@ export const GoalSelectionScreen = () => {
                             {getIcon(goal.id)}
                         </div>
                         <div>
-                            <h3 className="font-bold text-lg text-gray-800">{goal.name}</h3>
-                            <p className="text-sm text-gray-500">{goal.description}</p>
-                            <div className="mt-1 font-mono font-bold text-game-primary">Target: ₹{goal.targetAmount.toLocaleString()}</div>
+                            <h3 className="font-bold text-lg text-gray-800">{t(goal.nameKey)}</h3>
+                            <p className="text-sm text-gray-500">{t(goal.descKey)}</p>
+                            <div className="mt-1 font-mono font-bold text-game-primary">{t('goal_target')} ₹{goal.targetAmount.toLocaleString()}</div>
                         </div>
                     </button>
                 ))}
