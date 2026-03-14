@@ -59,6 +59,17 @@ export const HarvestScreen = () => {
                         <span>Total Expenses</span>
                         <span>- ₹{stats.totalExpenses.toLocaleString()}</span>
                     </div>
+
+{/* Add this inside the breakdown of your Harvest receipt */}
+<div className="flex justify-between items-center text-sm mb-2 pb-2 border-b">
+    <span className="text-gray-500">Sold at:</span>
+    <span className="font-bold text-gray-800">{state.lastHarvestStats?.mandiName}</span>
+</div>
+
+<div className="flex justify-between items-center text-sm text-red-500 mb-1">
+    <span>Transport Cost</span>
+    <span>- ₹{state.lastHarvestStats?.transportCost?.toLocaleString()}</span>
+</div>
                 </div>
             </div>
 

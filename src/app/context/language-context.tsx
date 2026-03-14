@@ -1,110 +1,124 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-type Language = 'en' | 'hi';
+export type Language = 'en' | 'hi' | 'mr' | 'te' | 'ta';
 
+// The Master Dictionary for Core UI
 const translations = {
-  en: {
-    app_title: 'KrishiNiti',
-    start_btn: 'Start Simulation',
-    season: 'Season',
-    savings: 'Savings',
-    debt: 'Debt',
-    wellbeing: 'Wellbeing',
-    plan_season: 'Plan Your Season',
-    select_crop: 'Select Crop',
-    select_loan: 'Select Credit',
-    select_insurance: 'Insurance',
-    confirm_plan: 'Confirm Plan',
-    event_alert: 'Mid-Season Update',
-    harvest_report: 'Harvest Report',
-    yield: 'Yield',
-    market_price: 'Market Price',
-    income: 'Total Income',
-    expenses: 'Expenses',
-    net_profit: 'Net Profit',
-    next_season: 'Next Season',
-    game_over: 'Financial Collapse',
-    poverty_warning: 'Warning: Debt Trap Imminent',
-    evt_rain_t: 'Good Monsoon',
-    evt_rain_d: 'Rainfall was adequate and timely.',
-    evt_pest_t: 'Pest Attack',
-    evt_pest_d: 'Locusts damaged part of the crop.',
-    evt_med_t: 'Health Emergency',
-    evt_med_d: 'Family member needed hospitalization.',
-    evt_wed_t: 'Family Wedding',
-    evt_wed_d: 'Social obligation costs incurred.',
-    evt_dry_t: 'Severe Drought',
-    evt_dry_d: 'Crops failed due to lack of water.',
-    evt_crash_t: 'Market Crash',
-    evt_crash_d: 'Global prices plummeted.',
-    resilience_score: 'Resilience Score',
-    continue: 'Continue',
-    restart: 'Restart Simulation'
-  },
-  hi: {
-    app_title: 'कृषि-नीति',
-    start_btn: 'सिम्युलेशन शुरू करें',
-    season: 'सीज़न',
-    savings: 'बचत',
-    debt: 'कर्ज',
-    wellbeing: 'खुशहाली',
-    plan_season: 'सीज़न की योजना',
-    select_crop: 'फसल चुनें',
-    select_loan: 'ऋण चुनें',
-    select_insurance: 'बीमा',
-    confirm_plan: 'योजना पक्की करें',
-    event_alert: 'सीज़न अपडेट',
-    harvest_report: 'फसल रिपोर्ट',
-    yield: 'उपज',
-    market_price: 'बाजार भाव',
-    income: 'कुल आय',
-    expenses: 'खर्चा',
-    net_profit: 'शुद्ध लाभ',
-    next_season: 'अगला सीज़न',
-    game_over: 'आर्थिक संकट',
-    poverty_warning: 'चेतावनी: कर्ज का जाल',
-    evt_rain_t: 'अच्छा मानसून',
-    evt_rain_d: 'बारिश समय पर और पर्याप्त हुई।',
-    evt_pest_t: 'कीट हमला',
-    evt_pest_d: 'टिड्डियों ने फसल को नुकसान पहुंचाया।',
-    evt_med_t: 'स्वास्थ्य आपातकाल',
-    evt_med_d: 'परिवार के सदस्य को अस्पताल ले जाना पड़ा।',
-    evt_wed_t: 'परिवार में शादी',
-    evt_wed_d: 'सामाजिक कार्यों में खर्च हुआ।',
-    evt_dry_t: 'गंभीर सूखा',
-    evt_dry_d: 'पानी की कमी से फसल बर्बाद हुई।',
-    evt_crash_t: 'बाजार में गिरावट',
-    evt_crash_d: 'कीमतों में भारी गिरावट आई।',
-    resilience_score: 'लचीलापन स्कोर',
-    continue: 'जारी रखें',
-    restart: 'पुनः आरंभ करें'
-  }
+    en: {
+        app_title: "KrishiNiti",
+        credit_score: "Credit Score",
+        season: "Season",
+        start_season: "Start New Season",
+        goals: "Life Goals",
+        bank: "Bank & Gold",
+        schemes: "Govt Schemes",
+        shop: "Asset Shop",
+        reports: "Reports",
+        profile: "My Profile",
+        quit: "Quit & Restart",
+        confirm_quit: "Are you sure you want to quit and start a new game?",
+        advisory: "Krishi Mitra Advisory"
+    },
+    hi: {
+        app_title: "कृषि-नीति",
+        credit_score: "क्रेडिट स्कोर",
+        season: "मौसम",
+        start_season: "नया मौसम शुरू करें",
+        goals: "जीवन के लक्ष्य",
+        bank: "बैंक और सोना",
+        schemes: "सरकारी योजनाएं",
+        shop: "दुकान (संपत्ति)",
+        reports: "रिपोर्ट्स",
+        profile: "मेरी प्रोफ़ाइल",
+        quit: "छोड़ें और रीस्टार्ट करें",
+        confirm_quit: "क्या आप वाकई छोड़ना और नया गेम शुरू करना चाहते हैं?",
+        advisory: "कृषि मित्र सलाह"
+    },
+    mr: {
+        app_title: "कृषी-नीती",
+        credit_score: "क्रेडिट स्कोअर",
+        season: "हंगाम",
+        start_season: "नवीन हंगाम सुरू करा",
+        goals: "जीवनाची उद्दिष्टे",
+        bank: "बँक आणि सोने",
+        schemes: "सरकारी योजना",
+        shop: "दुकान",
+        reports: "अहवाल",
+        profile: "माझी प्रोफाइल",
+        quit: "बाहेर पडा आणि रीस्टार्ट करा",
+        confirm_quit: "तुम्हाला नक्की बाहेर पडून नवीन गेम सुरू करायचा आहे का?",
+        advisory: "कृषी मित्र सल्ला"
+    },
+    te: {
+        app_title: "కృషి-నీతి",
+        credit_score: "క్రెడిట్ స్కోర్",
+        season: "సీజన్",
+        start_season: "కొత్త సీజన్ ప్రారంభించండి",
+        goals: "జీవిత లక్ష్యాలు",
+        bank: "బ్యాంక్ & బంగారం",
+        schemes: "ప్రభుత్వ పథకాలు",
+        shop: "ఆస్తి దుకాణం",
+        reports: "నివేదికలు",
+        profile: "నా ప్రొఫైల్",
+        quit: "నిష్క్రమించి పునఃప్రారంభించండి",
+        confirm_quit: "మీరు ఖచ్చితంగా నిష్క్రమించి కొత్త ఆటను ప్రారంభించాలనుకుంటున్నారా?",
+        advisory: "కృషి మిత్ర సలహా"
+    },
+    ta: {
+        app_title: "கிருஷி-நீதி",
+        credit_score: "கடன் மதிப்பெண்",
+        season: "பருவம்",
+        start_season: "புதிய பருவத்தை தொடங்கு",
+        goals: "வாழ்க்கை இலக்குகள்",
+        bank: "வங்கி & தங்கம்",
+        schemes: "அரசு திட்டங்கள்",
+        shop: "சொத்து கடை",
+        reports: "அறிக்கைகள்",
+        profile: "என் சுயவிவரம்",
+        quit: "வெளியேறு & மீண்டும் தொடங்கு",
+        confirm_quit: "நிச்சயமாக வெளியேறி புதிய விளையாட்டை தொடங்க வேண்டுமா?",
+        advisory: "கிருஷி மித்ரா ஆலோசனை"
+    }
 };
 
 interface LanguageContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (key: keyof typeof translations['en']) => string;
+    language: Language;
+    setLanguage: (lang: Language) => void;
+    t: (key: keyof typeof translations['en']) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
+    // Load saved language or default to English
+    const [language, setLanguageState] = useState<Language>('en');
 
-  const t = (key: keyof typeof translations['en']) => {
-    return translations[language][key] || key;
-  };
+    useEffect(() => {
+        const savedLang = localStorage.getItem('krishiniti_lang') as Language;
+        if (savedLang && translations[savedLang]) {
+            setLanguageState(savedLang);
+        }
+    }, []);
 
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+    const setLanguage = (lang: Language) => {
+        setLanguageState(lang);
+        localStorage.setItem('krishiniti_lang', lang);
+    };
+
+    // The translation function
+    const t = (key: keyof typeof translations['en']): string => {
+        return translations[language][key] || translations['en'][key] || key;
+    };
+
+    return (
+        <LanguageContext.Provider value={{ language, setLanguage, t }}>
+            {children}
+        </LanguageContext.Provider>
+    );
 };
 
 export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (!context) throw new Error('useLanguage must be used within LanguageProvider');
-  return context;
+    const context = useContext(LanguageContext);
+    if (!context) throw new Error("useLanguage must be used within LanguageProvider");
+    return context;
 };

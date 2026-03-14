@@ -25,9 +25,18 @@ export const SeasonPlanningScreen = () => {
   const selectedCrop = CROPS.find(c => c.id === cropId)!;
   const selectedLoan = loanId ? LOANS.find(l => l.id === loanId)! : LOANS[0];
 
-  const totalSeedCost = selectedCrop.costPerAcre * acres;
-  const insuranceCost = hasInsurance ? (INSURANCES[1].premium * acres) : 0;
-  const totalUpfrontCost = totalSeedCost + insuranceCost;
+  // 1. SOIL HEALTH CARD SUBSIDY: -10% on Upfront Seed/Fertilizer Costs
+  const hasSoilHealth = state.activeSchemes.includes('soil_health');
+  let selectedCropCost = selectedCrop.costPerAcre * acres;
+  if (hasSoilHealth) selectedCropCost *= 0.90;
+
+  // 2. PMFBY SUBSIDY: 50% off Insurance Premium
+  const hasPmfby = state.activeSchemes.includes('pmfby');
+  let baseInsPremium = INSURANCES[1].premium;
+  if (hasPmfby) baseInsPremium *= 0.5;
+
+  const insuranceCost = hasInsurance ? (baseInsPremium * acres) : 0;
+  const totalUpfrontCost = selectedCropCost + insuranceCost;
 
   const handleConfirm = () => {
     const available = savingsAlloc + (loanId ? loanAmount : 0);
@@ -78,10 +87,15 @@ export const SeasonPlanningScreen = () => {
                 
                 {/* 1. Crop Selection */}
                 <section className="mb-6 bg-white p-4 rounded-xl shadow-sm md:col-span-2">
-                    <h3 className="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">Select Crop</h3>
+                    <h3 className="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider flex items-center justify-between">
+                        Select Crop
+                        {hasSoilHealth && <span className="text-emerald-600 text-[10px] bg-emerald-100 px-2 py-1 rounded">10% Soil Health Discount Applied</span>}
+                    </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {availableCrops.map(c => {
-                            const cost = c.costPerAcre * acres;
+                            let costForThisCrop = c.costPerAcre * acres;
+                            if (hasSoilHealth) costForThisCrop *= 0.90; // Apply discount dynamically
+
                             return (
                                 <button
                                     key={c.id}
@@ -96,7 +110,7 @@ export const SeasonPlanningScreen = () => {
                                         <div className="text-[10px] text-gray-500 uppercase mt-1">{c.type}</div>
                                     </div>
                                     <div className="mt-2">
-                                        <div className="text-xs text-game-primary font-bold">₹{cost.toLocaleString()}</div>
+                                        <div className="text-xs text-game-primary font-bold">₹{costForThisCrop.toLocaleString()}</div>
                                         <div className="text-[10px] text-gray-400">for {acres} acres</div>
                                     </div>
                                 </button>
@@ -134,6 +148,11 @@ export const SeasonPlanningScreen = () => {
                     <div className="space-y-3">
                         {LOANS.filter(l => l.maxAmount > 0).map(l => {
                             const realMaxAmount = l.maxAmount * (acres / 2); 
+                            
+                            // Check for MISS scheme discount on KCC
+                            let displayInterest = l.interestRate;
+                            if (l.id === 'kcc' && state.activeSchemes.includes('miss')) displayInterest = 0.04;
+
                             return (
                                 <div key={l.id} className={clsx("rounded-lg border transition-all", loanId === l.id ? "border-game-primary bg-green-50 ring-1 ring-game-primary" : "border-gray-100")}>
                                     <button
@@ -141,9 +160,15 @@ export const SeasonPlanningScreen = () => {
                                         className="w-full p-3 flex items-center justify-between"
                                     >
                                         <div>
-                                            <div className="font-bold text-left text-sm">{l.name}</div>
-                                            <div className={clsx("text-xs text-left", l.interestRate > 0.15 ? "text-red-500" : "text-green-600")}>
-                                                {(l.interestRate * 100).toFixed(0)}% Interest
+                                            <div className="font-bold text-left text-sm flex items-center gap-2">
+                                                {l.name}
+                                                {l.id === 'kcc' && state.activeSchemes.includes('miss') && (
+                                                    <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">MISS</span>
+                                                )}
+                                            </div>
+                                            <div className={clsx("text-xs text-left font-bold mt-1", displayInterest > 0.15 ? "text-red-500" : "text-green-600")}>
+                                                {(displayInterest * 100).toFixed(0)}% Interest
+                                                {l.id === 'kcc' && state.activeSchemes.includes('miss') && <span className="line-through text-gray-400 font-normal ml-1">7%</span>}
                                             </div>
                                         </div>
                                     </button>
@@ -176,9 +201,12 @@ export const SeasonPlanningScreen = () => {
                     <div className="flex items-center gap-3">
                         <Shield className="w-8 h-8 text-game-primary" />
                         <div>
-                            <div className="font-bold text-lg">Crop Insurance</div>
+                            <div className="font-bold text-lg flex items-center gap-2">
+                                Crop Insurance
+                                {hasPmfby && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold uppercase">50% PMFBY Subsidy</span>}
+                            </div>
                             <div className="text-sm text-gray-500">
-                                Cost: ₹{insuranceCost.toLocaleString()} (for {acres.toFixed(1)} acres)
+                                Cost: <span className={hasPmfby ? "text-green-600 font-bold" : ""}>₹{insuranceCost.toLocaleString()}</span> (for {acres.toFixed(1)} acres)
                             </div>
                         </div>
                     </div>

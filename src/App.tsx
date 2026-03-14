@@ -16,6 +16,8 @@ import { ShopScreen } from './app/screens/shop-screen';
 import { GoalSelectionScreen } from './app/screens/goal-selection-screen';
 import { BankScreen } from './app/screens/bank-screen';
 import { GoalsScreen } from './app/screens/goals-screen'; 
+import { SchemesScreen } from './app/screens/schemes-screen';
+import { MarketScreen } from './app/screens/market-screen';
 
 const ScreenRouter = () => {
   const { state } = useGame();
@@ -43,6 +45,8 @@ const ScreenRouter = () => {
     'BANK': <BankScreen />,
     'GOALS': <GoalsScreen />, 
     'PLANNING': <SeasonPlanningScreen />,
+    'SCHEMES': <SchemesScreen />,
+    'MARKET': <MarketScreen />,
     'EVENT_EARLY': <EventScreen />,
     'EVENT_MID': <EventScreen />,
     'EVENT_LATE': <EventScreen />,

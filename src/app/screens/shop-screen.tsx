@@ -59,7 +59,20 @@ export const ShopScreen = () => {
         <div className="space-y-4 pb-20">
             {ASSETS.map(asset => {
                 const isOwned = state.ownedAssets.includes(asset.id);
-                const canAfford = state.savings >= asset.cost;
+                
+                // MULTIPLE SCHEMES SUBSIDY LOGIC
+                let displayCost = asset.cost;
+                let subsidizedBy = "";
+
+                if (state.activeSchemes.includes('pm_kusum') && asset.id === 'solar_pump') {
+                    displayCost *= 0.5; subsidizedBy = "PM-KUSUM";
+                } else if (state.activeSchemes.includes('per_drop') && asset.id === 'drip_irrigation') {
+                    displayCost *= 0.5; subsidizedBy = "Per Drop More Crop";
+                } else if (state.activeSchemes.includes('smam') && asset.id === 'mini_tractor') {
+                    displayCost *= 0.5; subsidizedBy = "SMAM";
+                }
+
+                const canAfford = state.savings >= displayCost;
 
                 return (
                     <div key={asset.id} className={`p-4 rounded-xl border-2 ${isOwned ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white'}`}>
@@ -69,19 +82,27 @@ export const ShopScreen = () => {
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{asset.description}</p>
                         
-                        <div className="flex justify-between items-center">
-                            <div className="text-[10px] font-mono bg-gray-100 px-2 py-1 rounded text-gray-500">
-                                {asset.type}
+                        <div className="flex justify-between items-end">
+                            <div className="flex flex-col gap-1.5">
+                                <div className="text-[10px] font-mono bg-gray-100 px-2 py-1 rounded text-gray-500 w-fit">
+                                    {asset.type}
+                                </div>
+                                {/* The beautifully styled Subsidy Badge */}
+                                {subsidizedBy && !isOwned && (
+                                    <div className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded w-fit border border-green-200">
+                                        50% {subsidizedBy} SUBSIDY
+                                    </div>
+                                )}
                             </div>
                             {isOwned ? (
-                                <span className="text-sm font-bold text-green-700">OWNED</span>
+                                <span className="text-sm font-bold text-green-700 pb-1">OWNED</span>
                             ) : (
                                 <button
                                     disabled={!canAfford}
                                     onClick={() => dispatch({ type: 'BUY_ASSET', payload: asset })}
                                     className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${canAfford ? 'bg-game-primary text-white shadow-md' : 'bg-gray-300 text-gray-500'}`}
                                 >
-                                    Buy ₹{asset.cost.toLocaleString()}
+                                    Buy ₹{displayCost.toLocaleString()}
                                 </button>
                             )}
                         </div>

@@ -2,12 +2,13 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { Crop, Loan, Insurance, GameEvent, EVENTS, ASSETS, Asset, FinancialGoal } from "../data/game-scenarios";
 import { saveGame, loadGame, clearGame } from "../utils/storage";
 import { calculateResilienceScore, detectPovertySpiral } from "../utils/game-calculations";
+import { QuizQuestion, getRandomQuiz } from "../engine/education-engine"; // NEW IMPORT
 
 export type GamePhase =
   | "SPLASH" | "LANGUAGE" | "GOAL_SELECTION" | "FARM_SETUP" | "DASHBOARD"
-  | "PROFILE" | "REPORTS" | "SHOP" | "BANK" | "GOALS"
+  | "PROFILE" | "REPORTS" | "SHOP" | "BANK" | "GOALS" | "SCHEMES"
   | "PLANNING" | "EVENT_EARLY" | "EVENT_MID" | "EVENT_LATE"
-  | "HARVEST" | "RESILIENCE" | "GAME_WIN" | "GAME_LOSS" | "SUMMARY";
+  | "MARKET" | "HARVEST" | "RESILIENCE" | "GAME_WIN" | "GAME_LOSS" | "SUMMARY"; // Added MARKET
 
 export interface GameState {
   seasonNumber: number;
@@ -45,6 +46,12 @@ export interface GameState {
   bankBalance: { fixedDeposit: number; fdMaturitySeason: number; goldGrams: number };
   dbtBalance: number;
 
+  // NEW: Education Engine State
+  activeQuiz: QuizQuestion | null;
+  completedQuizzes: string[];
+
+  activeSchemes: string[];
+
   cumulativeYield: number;
   cumulativePrice: number;
   seasonEventsLog: string[];
@@ -57,6 +64,8 @@ export interface GameState {
     insurancePayout: number;
     loanInterestPaid: number;
     eventCost: number;
+    mandiName: string;     // NEW
+    transportCost: number; // NEW
   } | null;
   history: any[];
 }
@@ -83,6 +92,12 @@ const INITIAL_STATE: GameState = {
   achievedGoals: [],
   bankBalance: { fixedDeposit: 0, fdMaturitySeason: 0, goldGrams: 0 },
   dbtBalance: 0,
+
+  // NEW: Initialize quiz state
+  activeQuiz: null,
+  completedQuizzes: [],
+
+  activeSchemes: [],
 
   phase: "SPLASH",
   currentCrop: null,
@@ -118,6 +133,9 @@ type Action =
   | { type: "CONFIRM_FARM_SETUP"; payload: { size: string; type: string } }
   | { type: "START_SEASON" } | { type: "GO_TO_DASHBOARD" } | { type: "GO_TO_PROFILE" }
   | { type: "GO_TO_REPORTS" } | { type: "GO_TO_SHOP" } | { type: "GO_TO_BANK" } | { type: "GO_TO_GOALS" }
+  | { type: "GO_TO_SCHEMES" } 
+  | { type: "APPLY_SCHEME"; payload: string }
+  | { type: "SELL_CROP"; payload: { priceMultiplier: number; transportCostPerAcre: number; mandiName: string } }
   | { type: "BUY_ASSET"; payload: Asset }
   | { type: "BUY_LAND"; payload: { acres: number; cost: number; downPayment: number } } 
   | { type: "SET_GOAL"; payload: FinancialGoal }
@@ -127,9 +145,11 @@ type Action =
   | { type: "TRIGGER_EVENT" }
   | { type: "RESOLVE_EVENT_CHOICE"; payload: { cost: number; wellbeing: number; } }
   | { type: "REPAY_LOAN"; payload: { amount: number; type: "FULL" | "PARTIAL" | "DEFAULT"; } }
-  | { type: "SHOW_RESILIENCE" } | { type: "NEXT_SEASON" } | { type: "RESET_GAME" };
+  | { type: "SHOW_RESILIENCE" } | { type: "NEXT_SEASON" } | { type: "RESET_GAME" }
+  | { type: "ANSWER_QUIZ"; payload: { isCorrect: boolean; reward: number; quizId: string } } // NEW
+  | { type: "CLOSE_QUIZ" }; // NEW
 
-const performHarvestCalculation = (state: GameState): Partial<GameState> => {
+const performHarvestCalculation = (state: GameState, mandiMultiplier: number, transportPerAcre: number, mandiName: string): Partial<GameState> => {
   if (!state.currentCrop) return {};
 
   const acres = state.totalAcres; 
@@ -137,18 +157,35 @@ const performHarvestCalculation = (state: GameState): Partial<GameState> => {
 
   const finalYieldPerAcre = state.currentCrop.minYield * variance * state.cumulativeYield;
   const totalYield = finalYieldPerAcre * acres;
-  const finalPrice = state.currentCrop.pricePerUnit * state.cumulativePrice;
+  
+  // e-NAM Subsidy: +10% to final market price
+  let basePrice = state.currentCrop.pricePerUnit;
+  if (state.activeSchemes.includes('enam')) basePrice = basePrice * 1.10;
+  
+  // APPLY MARKET MULTIPLIER
+  const finalPrice = basePrice * state.cumulativePrice * mandiMultiplier;
   const grossIncome = Math.floor(totalYield * finalPrice);
 
-  // Apply Operational Discounts
-  const baseCropCost = state.currentCrop.costPerAcre * acres;
+  let baseCropCost = state.currentCrop.costPerAcre * acres;
+  if (state.activeSchemes.includes('soil_health')) baseCropCost = baseCropCost * 0.90;
   const cropCost = getOperationalCost(baseCropCost, state.ownedAssets);
 
-  const insuranceCost = (state.currentInsurance?.premium || 0) * acres;
-  const interestRate = state.currentLoan ? state.currentLoan.interestRate : 0;
-  const interestAmount = Math.floor(state.currentLoanAmount * interestRate);
+  let insPremium = state.currentInsurance?.premium || 0;
+  if (state.activeSchemes.includes('pmfby') && state.currentInsurance?.id === 'standard') {
+      insPremium = insPremium * 0.5; 
+  }
+  const insuranceCost = insPremium * acres;
   
-  const totalExpenses = cropCost + insuranceCost + interestAmount + state.seasonFinancialHits;
+  let interestRate = state.currentLoan ? state.currentLoan.interestRate : 0;
+  if (state.activeSchemes.includes('miss') && state.currentLoan?.id === 'kcc') {
+      interestRate = 0.04;
+  }
+  
+  const interestAmount = Math.floor(state.currentLoanAmount * interestRate);
+  const totalTransportCost = transportPerAcre * acres; // NEW TRANSPORT COST
+  
+  // Added transport cost to total expenses
+  const totalExpenses = cropCost + insuranceCost + interestAmount + state.seasonFinancialHits + totalTransportCost;
 
   let insurancePayout = 0;
   const totalYieldDrop = variance * state.cumulativeYield;
@@ -159,25 +196,19 @@ const performHarvestCalculation = (state: GameState): Partial<GameState> => {
 
   let liquidCash = state.savings + grossIncome + insurancePayout;
   let newDebt = state.debt + state.currentLoanAmount + interestAmount;
-
-  if (liquidCash < 0) {
-    newDebt += Math.abs(liquidCash);
-    liquidCash = 0;
-  }
+  if (liquidCash < 0) { newDebt += Math.abs(liquidCash); liquidCash = 0; }
 
   const isSpiral = detectPovertySpiral(newDebt, 50000 * acres);
   const resilienceData = calculateResilienceScore(liquidCash, newDebt, state.wellbeing, state.currentInsurance?.id !== "none");
 
   return {
-    savings: liquidCash,
-    debt: newDebt,
-    resilienceScore: resilienceData.total,
-    resilienceBreakdown: resilienceData.breakdown,
-    isPovertySpiral: isSpiral,
-    lastHarvestStats: {
-      grossIncome, totalExpenses, netProfit: grossIncome + insurancePayout - totalExpenses,
-      yieldPercentage: totalYieldDrop * 100, insurancePayout, loanInterestPaid: interestAmount,
-      eventCost: state.seasonFinancialHits,
+    savings: liquidCash, debt: newDebt, resilienceScore: resilienceData.total, resilienceBreakdown: resilienceData.breakdown,
+    isPovertySpiral: isSpiral, 
+    lastHarvestStats: { 
+        grossIncome, totalExpenses, netProfit: grossIncome + insurancePayout - totalExpenses, 
+        yieldPercentage: totalYieldDrop * 100, insurancePayout, loanInterestPaid: interestAmount, 
+        eventCost: state.seasonFinancialHits,
+        mandiName, transportCost: totalTransportCost // SAVED TO HISTORY
     },
     history: [...state.history, { season: state.seasonNumber, income: grossIncome, resilience: resilienceData.total }],
   };
@@ -208,10 +239,32 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     case "GO_TO_SHOP": return { ...state, phase: "SHOP" };
     case "GO_TO_BANK": return { ...state, phase: "BANK" };
     case "GO_TO_GOALS": return { ...state, phase: "GOALS" };
+    case "GO_TO_SCHEMES": return { ...state, phase: "SCHEMES" };
+    case "APPLY_SCHEME": 
+        if (state.activeSchemes.includes(action.payload)) return state;
+        return { ...state, activeSchemes: [...state.activeSchemes, action.payload] };
 
-    case "BUY_ASSET":
-      if (state.savings < action.payload.cost) return state;
-      return { ...state, savings: state.savings - action.payload.cost, ownedAssets: [...state.ownedAssets, action.payload.id] };
+    // NEW EDUCATIONAL ENGINE ACTIONS
+    case "ANSWER_QUIZ": {
+        const { isCorrect, reward, quizId } = action.payload;
+        return {
+            ...state,
+            savings: state.savings + (isCorrect ? reward : 0),
+            completedQuizzes: [...state.completedQuizzes, quizId]
+        };
+    }
+    case "CLOSE_QUIZ": 
+        return { ...state, activeQuiz: null };
+
+    case "BUY_ASSET": {
+      let finalCost = action.payload.cost;
+      if (state.activeSchemes.includes('pm_kusum') && action.payload.id === 'solar_pump') finalCost *= 0.5;
+      if (state.activeSchemes.includes('per_drop') && action.payload.id === 'drip_irrigation') finalCost *= 0.5;
+      if (state.activeSchemes.includes('smam') && action.payload.id === 'mini_tractor') finalCost *= 0.5;
+
+      if (state.savings < finalCost) return state;
+      return { ...state, savings: state.savings - finalCost, ownedAssets: [...state.ownedAssets, action.payload.id] };
+    }
 
     case "BUY_LAND": {
         const { acres, cost, downPayment } = action.payload;
@@ -234,22 +287,12 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     }
       
     case "ACHIEVE_GOAL": {
-        const { goal } = action.payload;
-        // 1. Check affordability
+        const { goal, isMain } = action.payload;
         if (state.savings < goal.targetAmount) return state;
-        
-        // 2. Deduct money
         const newSavings = state.savings - goal.targetAmount;
         const newGoals = [...state.achievedGoals, goal.id];
-        
-        // 3. FIX: Do NOT end game automatically. Keep playing.
-        // The player can choose to restart from Dashboard if they are done.
-        return { 
-            ...state, 
-            savings: newSavings, 
-            achievedGoals: newGoals, 
-            phase: "GOALS" // Stay on goals screen to see the "Completed" badge
-        };
+        const nextPhase = isMain ? "GAME_WIN" : "GOALS"; 
+        return { ...state, savings: newSavings, achievedGoals: newGoals, phase: nextPhase };
     }
 
     case "BANK_TRANSACTION": {
@@ -283,29 +326,18 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       const { crop, loan, loanAmount, insurance, savingsAllocated } = action.payload;
       const acres = state.totalAcres;
       
-      const baseTotalCost = crop.costPerAcre * acres;
+      let baseTotalCost = crop.costPerAcre * acres;
+      if (state.activeSchemes.includes('soil_health')) baseTotalCost *= 0.90;
       const totalCropCost = getOperationalCost(baseTotalCost, state.ownedAssets);
 
-      const totalInsuranceCost = insurance.premium * acres;
+      let insPremium = insurance.premium;
+      if (state.activeSchemes.includes('pmfby') && insurance.id === 'standard') insPremium *= 0.5;
+      const totalInsuranceCost = insPremium * acres;
+
       const upfrontCost = totalCropCost + totalInsuranceCost;
       const liquidCash = savingsAllocated + loanAmount;
-      const remainingSavings = state.savings - savingsAllocated;
-      const finalCashForSeason = Math.max(0, liquidCash - upfrontCost + remainingSavings); 
-
-      return {
-        ...state,
-        currentCrop: crop,
-        currentLoan: loan,
-        currentLoanAmount: loanAmount,
-        currentInsurance: insurance,
-        phase: "EVENT_EARLY",
-        savings: finalCashForSeason,
-        debt: state.debt,
-        cumulativeYield: 1.0,
-        cumulativePrice: 1.0,
-        seasonEventsLog: [],
-        seasonFinancialHits: 0,
-      };
+      const finalCashForSeason = Math.max(0, liquidCash - upfrontCost + (state.savings - savingsAllocated)); 
+      return { ...state, currentCrop: crop, currentLoan: loan, currentLoanAmount: loanAmount, currentInsurance: insurance, phase: "EVENT_EARLY", savings: finalCashForSeason, cumulativeYield: 1.0, cumulativePrice: 1.0, seasonEventsLog: [], seasonFinancialHits: 0 };
     }
 
     case "TRIGGER_EVENT":
@@ -349,21 +381,28 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       const nextLog = [...state.seasonEventsLog, evt.titleKey];
       const nextFinancialHits = state.seasonFinancialHits + directCashHit;
 
-      let nextPhase: GamePhase = "HARVEST";
+      // Transition to MARKET instead of HARVEST
+      let nextPhase: GamePhase = "MARKET"; 
       if (state.phase === "EVENT_EARLY") nextPhase = "EVENT_MID";
       else if (state.phase === "EVENT_MID") nextPhase = "EVENT_LATE";
 
-      const nextState = {
+      return {
         ...state, savings: nextSavings, cumulativeYield: nextYield, cumulativePrice: nextPrice,
         wellbeing: nextWellbeing, seasonEventsLog: nextLog, seasonFinancialHits: nextFinancialHits,
         phase: nextPhase, currentEvent: null,
       };
+    } // End of RESOLVE_EVENT_CHOICE case
 
-      if (nextPhase === "HARVEST") {
-        const harvestResults = performHarvestCalculation(nextState);
-        return { ...nextState, ...harvestResults };
-      }
-      return nextState;
+    // ADD THIS BRAND NEW CASE IMMEDIATELY AFTER RESOLVE_EVENT_CHOICE:
+    case "SELL_CROP": {
+        const { priceMultiplier, transportCostPerAcre, mandiName } = action.payload;
+        // Trigger the math now that we know where they are selling
+        const harvestResults = performHarvestCalculation(state, priceMultiplier, transportCostPerAcre, mandiName);
+        return {
+            ...state,
+            ...harvestResults,
+            phase: "HARVEST"
+        };
     }
 
     case "REPAY_LOAN": {
@@ -392,7 +431,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             maturedamount = Math.floor(state.bankBalance.fixedDeposit * 1.1); 
             newFD = 0; 
         }
-        const dbt = 2000; 
+        // PM-KISAN LOGIC
+        const dbt = state.activeSchemes.includes('pm_kisan') ? 2000 : 0; 
 
         let newSavings = state.savings + maturedamount + dbt;
         let newLandLoan = { ...state.landLoan };
@@ -409,6 +449,12 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             }
         }
 
+        // FIX: Temporarily set chance to 100% so you can guarantee testing it at the end of every season
+        let newQuiz = null;
+        if (Math.random() > 0.0) { // 100% chance
+            newQuiz = getRandomQuiz(state.completedQuizzes);
+        }
+
         return {
             ...state,
             seasonNumber: state.seasonNumber + 1,
@@ -418,6 +464,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             bankBalance: { ...state.bankBalance, fixedDeposit: newFD },
             dbtBalance: state.dbtBalance + dbt,
             landLoan: newLandLoan,
+            activeQuiz: newQuiz, // <-- Add activeQuiz to the state payload
             
             currentCrop: null, currentLoan: null, currentEvent: null,
             cumulativeYield: 1.0, cumulativePrice: 1.0, 
@@ -435,7 +482,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
 
   useEffect(() => {
-    // UPDATED LOGIC: Always wait 2.5s for splash, then load game OR start new
     setTimeout(() => {
         const saved = loadGame<GameState>();
         if (saved && saved.phase !== "SPLASH") {
