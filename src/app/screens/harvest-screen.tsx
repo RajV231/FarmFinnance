@@ -1,15 +1,15 @@
 import React from 'react';
 import { useGame } from '../context/game-context';
-import { useLanguage } from '../context/language-context'; // NEW
+import { useLanguage } from '../context/language-context';
 import { TrendingUp, TrendingDown, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { FarmVisualizer } from '../components/farm-visualizer';
 
 export const HarvestScreen = () => {
   const { state, dispatch } = useGame();
-  const { t } = useLanguage(); // NEW
+  const { t } = useLanguage(); 
   
   const stats = state.lastHarvestStats || {
-      grossIncome: 0, totalExpenses: 0, netProfit: 0, yieldPercentage: 0, insurancePayout: 0
+      grossIncome: 0, totalExpenses: 0, netProfit: 0, yieldPercentage: 0, insurancePayout: 0, assetMaintenanceCost: 0
   };
 
   const totalDebt = state.debt;
@@ -26,7 +26,7 @@ export const HarvestScreen = () => {
 
         <div className="p-6">
             <h1 className="text-2xl font-bold text-game-primary mb-2 text-center">{t('ui_harvest_report')}</h1>
-            <p className="text-gray-500 mb-6 text-center">{t('ui_season_results').replace('{val}', state.seasonNumber.toString())}</p>
+            <p className="text-gray-500 mb-6 text-center">{t('ui_season_results', { val: state.seasonNumber.toString() })}</p>
 
             <div className="bg-white w-full rounded-2xl shadow-lg p-6 mb-6">
                 <div className="flex justify-between items-center mb-6">
@@ -68,6 +68,14 @@ export const HarvestScreen = () => {
                         <span>{t('ui_transport_cost')}</span>
                         <span>- ₹{state.lastHarvestStats?.transportCost?.toLocaleString()}</span>
                     </div>
+
+                    {/* NEW: ASSET MAINTENANCE BLOCK */}
+                    {stats.assetMaintenanceCost > 0 && (
+                        <div className="flex justify-between items-center text-sm text-red-500 mb-1">
+                            <span>{t('ui_maintenance')}</span>
+                            <span>- ₹{stats.assetMaintenanceCost.toLocaleString()}</span>
+                        </div>
+                    )}
                 </div>
             </div>
 

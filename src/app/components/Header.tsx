@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '../context/language-context';
 import { useGame } from '../context/game-context';
 import { RefreshCw, Globe, Sprout } from 'lucide-react';
+import { RollingNumber } from './rolling-number';
 
 export const Header = () => {
   const { t, language, setLanguage } = useLanguage();
@@ -42,15 +43,24 @@ export const Header = () => {
       <div className="max-w-4xl mx-auto mt-4 grid grid-cols-3 gap-2 text-sm">
         <div className="bg-earth-800 p-2 rounded text-center">
           <div className="text-earth-100 opacity-75">{t('header_savings')}</div>
-          <div className="font-mono font-bold">₹{state.savings.toLocaleString()}</div>
+          <div className="font-mono font-bold text-white">
+             {/* 2. USE ROLLING NUMBER HERE */}
+             <RollingNumber prefix="₹" value={state.savings} />
+          </div>
         </div>
         <div className="bg-earth-800 p-2 rounded text-center">
           <div className="text-earth-100 opacity-75">{t('header_debt')}</div>
-          <div className="font-mono font-bold text-red-300">₹{state.debt.toLocaleString()}</div>
+          <div className="font-mono font-bold text-red-300">
+             {/* 3. USE ROLLING NUMBER HERE */}
+             <RollingNumber prefix="₹" value={state.debt} />
+          </div>
         </div>
         <div className="bg-earth-800 p-2 rounded text-center">
           <div className="text-earth-100 opacity-75">{t('header_wellbeing')}</div>
-          <div className="font-mono font-bold text-green-300">{state.wellbeing}%</div>
+          <div className="font-mono font-bold text-green-300">
+             {/* 4. USE ROLLING NUMBER HERE */}
+             <RollingNumber value={state.wellbeing} suffix="%" />
+          </div>
         </div>
       </div>
     </header>

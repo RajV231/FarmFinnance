@@ -3,6 +3,7 @@ import { Crop, Loan, Insurance, GameEvent, EVENTS, ASSETS, Asset, FinancialGoal 
 import { saveGame, loadGame, clearGame } from "../utils/storage";
 import { calculateResilienceScore, detectPovertySpiral } from "../utils/game-calculations";
 import { QuizQuestion, getRandomQuiz } from "../engine/education-engine"; // NEW IMPORT
+import { playSFX } from "../utils/fx-engine";
 
 export type GamePhase =
   | "SPLASH" | "LANGUAGE" | "GOAL_SELECTION" | "FARM_SETUP" | "DASHBOARD"
@@ -51,6 +52,7 @@ export interface GameState {
   completedQuizzes: string[];
 
   activeSchemes: string[];
+  weatherForecast: string; // NEW: Weather Forecast State
 
   cumulativeYield: number;
   cumulativePrice: number;
@@ -66,6 +68,7 @@ export interface GameState {
     eventCost: number;
     mandiName: string;     // NEW
     transportCost: number; // NEW
+    assetMaintenanceCost: number; // NEW: Realism - Maintenance Tracking
   } | null;
   history: any[];
 }
@@ -98,6 +101,7 @@ const INITIAL_STATE: GameState = {
   completedQuizzes: [],
 
   activeSchemes: [],
+  weatherForecast: 'forecast_normal', // Default forecast
 
   phase: "SPLASH",
   currentCrop: null,
@@ -155,14 +159,15 @@ const performHarvestCalculation = (state: GameState, mandiMultiplier: number, tr
   const acres = state.totalAcres; 
   const variance = 0.85 + Math.random() * 0.3; 
 
-  const finalYieldPerAcre = state.currentCrop.minYield * variance * state.cumulativeYield;
+  // NEW: Realism - Wellbeing Penalty! (If health < 30%, yield drops by 15% due to poor labor)
+  const wellbeingPenalty = state.wellbeing < 30 ? 0.85 : 1.0;
+
+  const finalYieldPerAcre = state.currentCrop.minYield * variance * state.cumulativeYield * wellbeingPenalty;
   const totalYield = finalYieldPerAcre * acres;
   
-  // e-NAM Subsidy: +10% to final market price
   let basePrice = state.currentCrop.pricePerUnit;
   if (state.activeSchemes.includes('enam')) basePrice = basePrice * 1.10;
   
-  // APPLY MARKET MULTIPLIER
   const finalPrice = basePrice * state.cumulativePrice * mandiMultiplier;
   const grossIncome = Math.floor(totalYield * finalPrice);
 
@@ -180,12 +185,14 @@ const performHarvestCalculation = (state: GameState, mandiMultiplier: number, tr
   if (state.activeSchemes.includes('miss') && state.currentLoan?.id === 'kcc') {
       interestRate = 0.04;
   }
-  
   const interestAmount = Math.floor(state.currentLoanAmount * interestRate);
-  const totalTransportCost = transportPerAcre * acres; // NEW TRANSPORT COST
+  const totalTransportCost = transportPerAcre * acres; 
   
-  // Added transport cost to total expenses
-  const totalExpenses = cropCost + insuranceCost + interestAmount + state.seasonFinancialHits + totalTransportCost;
+  // NEW: Realism - Asset Maintenance Cost
+  const assetMaintenanceCost = ASSETS.filter(a => state.ownedAssets.includes(a.id)).reduce((sum, asset) => sum + asset.maintenanceCost, 0);
+
+  // Added maintenance cost to total expenses
+  const totalExpenses = cropCost + insuranceCost + interestAmount + state.seasonFinancialHits + totalTransportCost + assetMaintenanceCost;
 
   let insurancePayout = 0;
   const totalYieldDrop = variance * state.cumulativeYield;
@@ -208,7 +215,8 @@ const performHarvestCalculation = (state: GameState, mandiMultiplier: number, tr
         grossIncome, totalExpenses, netProfit: grossIncome + insurancePayout - totalExpenses, 
         yieldPercentage: totalYieldDrop * 100, insurancePayout, loanInterestPaid: interestAmount, 
         eventCost: state.seasonFinancialHits,
-        mandiName, transportCost: totalTransportCost // SAVED TO HISTORY
+        mandiName, transportCost: totalTransportCost,
+        assetMaintenanceCost // NEW
     },
     history: [...state.history, { season: state.seasonNumber, income: grossIncome, resilience: resilienceData.total }],
   };
@@ -455,11 +463,16 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             newQuiz = getRandomQuiz(state.completedQuizzes);
         }
 
+        // NEW: Generate Weather Forecast for the upcoming season
+        const forecasts = ['forecast_normal', 'forecast_drought', 'forecast_heavy_rain', 'forecast_good'];
+        const nextForecast = forecasts[Math.floor(Math.random() * forecasts.length)];
+
         return {
             ...state,
             seasonNumber: state.seasonNumber + 1,
             phase: "DASHBOARD",
-            savings: newSavings, 
+            savings: newSavings,
+            weatherForecast: nextForecast, // NEW
             debt: state.debt + penaltyDebt,
             bankBalance: { ...state.bankBalance, fixedDeposit: newFD },
             dbtBalance: state.dbtBalance + dbt,
@@ -493,7 +506,63 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => { if (state.phase !== "SPLASH") saveGame(state); }, [state]);
-  return <GameContext.Provider value={{ state, dispatch }}>{children}</GameContext.Provider>;
+
+  // 2. CREATE A WRAPPER FOR DISPATCH TO AUTO-PLAY SOUNDS!
+  const dispatchWithFX = (action: Action) => {
+    switch (action.type) {
+        case 'COMMIT_PLAN':
+            playSFX('plant'); // Planting seeds sound
+            break;
+        case 'SELL_CROP':
+            playSFX('harvest'); // Major chord harvest sound
+            break;
+        case 'APPLY_SCHEME':
+        case 'ACHIEVE_GOAL':
+            playSFX('success'); // General happy sound
+            break;
+        case 'BUY_ASSET':
+        case 'BUY_LAND':
+        case 'REPAY_LOAN':
+            playSFX('cash'); // Cash register
+            break;
+        case 'BANK_TRANSACTION':
+            // If they took a loan, play the heavy loan sound! Otherwise cash.
+            if (action.payload.type === 'PAY_LAND_PRINCIPAL') {
+               playSFX('cash');
+            } else {
+               playSFX('cash'); // Assuming FD or Gold is positive
+            }
+            break;
+        case 'RESOLVE_EVENT_CHOICE':
+            // If the event costs them money or hurts their wellbeing, play a bad sound!
+            if (action.payload.cost > 2000 || action.payload.wellbeing < 0) {
+                playSFX('bad_event');
+            } else {
+                playSFX('click');
+            }
+            break;
+        case 'ANSWER_QUIZ':
+            // If right, success! If wrong, BUZZ!
+            if (action.payload.isCorrect) playSFX('success');
+            else playSFX('buzz');
+            break;
+        case 'RESET_GAME':
+            playSFX('error');
+            break;
+        case 'NEXT_SEASON':
+        case 'TRIGGER_EVENT':
+        case 'SHOW_RESILIENCE':
+            // No sound needed for screen transitions
+            break;
+        default:
+            playSFX('click'); // Standard UI navigation tick
+            break;
+    }
+    dispatch(action);
+  };
+
+  // 3. PASS THE WRAPPED DISPATCH INSTEAD OF THE RAW ONE
+  return <GameContext.Provider value={{ state, dispatch: dispatchWithFX }}>{children}</GameContext.Provider>;
 };
 
 export const useGame = () => {

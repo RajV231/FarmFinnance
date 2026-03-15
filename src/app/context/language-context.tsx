@@ -64,7 +64,15 @@ const translations = {
         quiz_pmfby_q: "What does the PMFBY scheme protect you against?", quiz_pmfby_o1: "Theft of farm equipment", quiz_pmfby_o2: "Crop loss due to natural calamities", quiz_pmfby_o3: "Medical emergencies", quiz_pmfby_o4: "Market price drops", quiz_pmfby_exp: "PMFBY is the government's flagship crop insurance scheme that financially protects farmers if crops are destroyed by weather.",
         quiz_compound_q: "Why is a local Moneylender's 36% interest rate extremely dangerous?", quiz_compound_o1: "They require too much paperwork", quiz_compound_o2: "Debt grows exponentially faster", quiz_compound_o3: "They give loans in cash only", quiz_compound_o4: "There is no difference from a bank", quiz_compound_exp: "High-interest loans compound rapidly, trapping farmers in permanent debt.",
         quiz_div_q: "What is 'Crop Diversification' in financial terms?", quiz_div_o1: "Planting only one high-value crop every year", quiz_div_o2: "Growing different types of crops to spread out risk", quiz_div_o3: "Selling crops to different mandis", quiz_div_o4: "Using multiple types of chemical fertilizers", quiz_div_exp: "Growing different crops ensures that if one fails due to disease or weather, the others might still survive.",
-        quiz_inf_q: "Why is keeping all your savings as cash in a box at home a bad idea?", quiz_inf_o1: "Cash loses value over time due to inflation", quiz_inf_o2: "The bank will charge you a fee", quiz_inf_o3: "You cannot use cash to buy seeds", quiz_inf_o4: "It is bad luck", quiz_inf_exp: "Inflation means things get more expensive over time. Putting money in a Fixed Deposit (FD) helps it grow to beat inflation."
+        quiz_inf_q: "Why is keeping all your savings as cash in a box at home a bad idea?", quiz_inf_o1: "Cash loses value over time due to inflation", quiz_inf_o2: "The bank will charge you a fee", quiz_inf_o3: "You cannot use cash to buy seeds", quiz_inf_o4: "It is bad luck", quiz_inf_exp: "Inflation means things get more expensive over time. Putting money in a Fixed Deposit (FD) helps it grow to beat inflation.",
+
+        forecast_label: "Season Forecast",
+        forecast_normal: "Normal Weather Expected",
+        forecast_drought: "High Chance of Drought",
+        forecast_heavy_rain: "Heavy Rains Expected",
+        forecast_good: "Excellent Weather Conditions",
+        ui_maintenance: "Asset Maintenance",
+        tts_what_do: "What will you do?", tts_option_a: "Option 1", tts_option_b: "Option 2", tts_cost: "cost", tts_rupees: "rupees",
     },
     hi: {
         app_title: "कृषि-नीति", credit_score: "क्रेडिट स्कोर", season: "मौसम", start_season: "नया मौसम शुरू करें", goals: "जीवन के लक्ष्य", bank: "बैंक और सोना", schemes: "सरकारी योजनाएं", shop: "संपत्ति", reports: "रिपोर्ट्स", profile: "प्रोफ़ाइल", quit: "छोड़ें", confirm_quit: "क्या आप वाकई गेम छोड़ना चाहते हैं?", advisory: "कृषि मित्र सलाह", ui_back: "पीछे", ui_continue: "जारी रखें", ui_confirm: "पुष्टि करें", splash_subtitle: "कृषि और वित्त का खेल", unknown_phase: "अज्ञात चरण", ui_switch_lang: "भाषा बदलें", ui_restart_game: "गेम रीस्टार्ट करें", header_savings: "बचत", header_debt: "कर्ज", header_wellbeing: "सुख-समृद्धि",
@@ -102,7 +110,14 @@ const translations = {
         quiz_pmfby_q: "PMFBY योजना आपको किससे बचाती है?", quiz_pmfby_o1: "उपकरण की चोरी", quiz_pmfby_o2: "प्राकृतिक आपदाओं के कारण फसल का नुकसान", quiz_pmfby_o3: "चिकित्सा आपात स्थिति", quiz_pmfby_o4: "बाजार मूल्य में गिरावट", quiz_pmfby_exp: "PMFBY सरकार की फसल बीमा योजना है जो मौसम द्वारा फसल नष्ट होने पर रक्षा करती है।",
         quiz_compound_q: "साहूकार का 36% ब्याज दर बहुत खतरनाक क्यों है?", quiz_compound_o1: "कागजी कार्रवाई", quiz_compound_o2: "ऋण तेजी से बढ़ता है (कर्ज का जाल)", quiz_compound_o3: "केवल नकद ऋण", quiz_compound_o4: "बैंक से कोई अंतर नहीं", quiz_compound_exp: "उच्च ब्याज वाले ऋण तेजी से बढ़ते हैं, जिससे कर्ज का जाल बन जाता है।",
         quiz_div_q: "'फसल विविधीकरण' (Crop Diversification) क्या है?", quiz_div_o1: "एक ही फसल लगाना", quiz_div_o2: "जोखिम को फैलाने के लिए विभिन्न प्रकार की फसलें उगाना", quiz_div_o3: "अलग-अलग मंडियों में बेचना", quiz_div_o4: "रासायनिक उर्वरक", quiz_div_exp: "विभिन्न फसलें उगाने से यह सुनिश्चित होता है कि यदि एक फसल विफल हो जाती है, तो अन्य जीवित रह सकती हैं।",
-        quiz_inf_q: "अपनी सारी बचत घर पर नकद में रखना बुरा विचार क्यों है?", quiz_inf_o1: "मुद्रास्फीति (महंगाई) के कारण नकद मूल्य खो देता है", quiz_inf_o2: "बैंक शुल्क लेगा", quiz_inf_o3: "बीज नहीं खरीद सकते", quiz_inf_o4: "बुरा शगुन", quiz_inf_exp: "महंगाई के कारण नकद का मूल्य घटता है। FD में पैसा रखने से मूल्य बढ़ता है।"
+        quiz_inf_q: "अपनी सारी बचत घर पर नकद में रखना बुरा विचार क्यों है?", quiz_inf_o1: "मुद्रास्फीति (महंगाई) के कारण नकद मूल्य खो देता है", quiz_inf_o2: "बैंक शुल्क लेगा", quiz_inf_o3: "बीज नहीं खरीद सकते", quiz_inf_o4: "बुरा शगुन", quiz_inf_exp: "महंगाई के कारण नकद का मूल्य घटता है। FD में पैसा रखने से मूल्य बढ़ता है।",
+        forecast_label: "मौसम पूर्वानुमान",
+        forecast_normal: "सामान्य मौसम की उम्मीद",
+        forecast_drought: "सूखे की उच्च संभावना",
+        forecast_heavy_rain: "भारी बारिश की उम्मीद",
+        forecast_good: "उत्कृष्ट मौसम की स्थिति",
+        ui_maintenance: "संपत्ति रखरखाव",
+        tts_what_do: "आप क्या करेंगे?", tts_option_a: "विकल्प 1", tts_option_b: "विकल्प 2", tts_cost: "लागत", tts_rupees: "रुपये",
     },
     mr: {
         app_title: "कृषी-नीती", credit_score: "क्रेडिट स्कोअर", season: "हंगाम", start_season: "नवीन हंगाम सुरू करा", goals: "जीवनाची उद्दिष्टे", bank: "बँक आणि सोने", schemes: "सरकारी योजना", shop: "दुकान", reports: "अहवाल", profile: "प्रोफाइल", quit: "बाहेर पडा", confirm_quit: "तुम्हाला नक्की बाहेर पडायचे आहे का?", advisory: "कृषी मित्र सल्ला", ui_back: "मागे", ui_continue: "पुढे जा", ui_confirm: "निश्चित करा", splash_subtitle: "शेती आणि आर्थिक खेळ", unknown_phase: "अज्ञात टप्पा", ui_switch_lang: "भाषा बदला", ui_restart_game: "गेम पुन्हा सुरू करा", header_savings: "बचत", header_debt: "कर्ज", header_wellbeing: "सुख-समाधान",
@@ -140,7 +155,14 @@ const translations = {
         quiz_pmfby_q: "PMFBY योजना तुम्हाला कशापासून संरक्षण देते?", quiz_pmfby_o1: "उपकरणांची चोरी", quiz_pmfby_o2: "नैसर्गिक आपत्तीमुळे पिकांचे नुकसान", quiz_pmfby_o3: "वैद्यकीय आणीबाणी", quiz_pmfby_o4: "बाजारभाव घसरणे", quiz_pmfby_exp: "PMFBY ही सरकारची पीक विमा योजना आहे जी हवामान किंवा कीटकांनी पिके नष्ट केल्यास शेतकऱ्यांचे रक्षण करते.",
         quiz_compound_q: "सावकाराचा 36% व्याजदर अत्यंत धोकादायक का आहे?", quiz_compound_o1: "कागदपत्रे", quiz_compound_o2: "कर्ज वेगाने वाढते", quiz_compound_o3: "फक्त रोख", quiz_compound_o4: "बँकेपेक्षा वेगळे नाही", quiz_compound_exp: "जास्त व्याजाचे कर्ज वेगाने वाढते. 36% दराने घेतलेले कर्ज वेळेत फेडता येत नाही.",
         quiz_div_q: "'पीक विविधता' (Crop Diversification) म्हणजे काय?", quiz_div_o1: "एकच पीक घेणे", quiz_div_o2: "जोखीम कमी करण्यासाठी विविध प्रकारची पिके घेणे", quiz_div_o3: "वेगवेगळ्या मंडईत विकणे", quiz_div_o4: "रासायनिक खते", quiz_div_exp: "विविध पिके घेतल्याने एक पीक खराब झाले तरी दुसरे पीक जगण्याची शक्यता वाढते.",
-        quiz_inf_q: "तुमची सर्व बचत घरात रोख स्वरूपात ठेवणे वाईट का आहे?", quiz_inf_o1: "महागाईमुळे रोख रकमेचे मूल्य कमी होते", quiz_inf_o2: "बँक शुल्क आकारेल", quiz_inf_o3: "बियाणे खरेदी करू शकत नाही", quiz_inf_o4: "वाईट शकुन", quiz_inf_exp: "महागाईमुळे वस्तू महाग होतात. मुदत ठेवीत (FD) पैसे ठेवल्याने त्याचे मूल्य वाढते."
+        quiz_inf_q: "तुमची सर्व बचत घरात रोख स्वरूपात ठेवणे वाईट का आहे?", quiz_inf_o1: "महागाईमुळे रोख रकमेचे मूल्य कमी होते", quiz_inf_o2: "बँक शुल्क आकारेल", quiz_inf_o3: "बियाणे खरेदी करू शकत नाही", quiz_inf_o4: "वाईट शकुन", quiz_inf_exp: "महागाईमुळे वस्तू महाग होतात. मुदत ठेवीत (FD) पैसे ठेवल्याने त्याचे मूल्य वाढते.",
+        forecast_label: "हवामान अंदाज",
+        forecast_normal: "सामान्य हवामानाची अपेक्षा",
+        forecast_drought: "दुष्काळाची दाट शक्यता",
+        forecast_heavy_rain: "मुसळधार पावसाची शक्यता",
+        forecast_good: "उत्तम हवामान परिस्थिती",
+        ui_maintenance: "मालमत्ता देखभाल",
+        tts_what_do: "तुम्ही काय कराल?", tts_option_a: "पर्याय 1", tts_option_b: "पर्याय 2", tts_cost: "खर्च", tts_rupees: "रुपये",
     },
     te: {
         app_title: "కృషి-నీతి", credit_score: "క్రెడిట్ స్కోర్", season: "సీజన్", start_season: "కొత్త సీజన్", goals: "జీవిత లక్ష్యాలు", bank: "బ్యాంక్ & బంగారం", schemes: "పథకాలు", shop: "దుకాణం", reports: "నివేదికలు", profile: "ప్రొఫైల్", quit: "నిష్క్రమించు", confirm_quit: "మీరు నిష్క్రమించాలనుకుంటున్నారా?", advisory: "కృషి మిత్ర సలహా", ui_back: "వెనుకకు", ui_continue: "కొనసాగించు", ui_confirm: "నిర్ధారించు", splash_subtitle: "వ్యవసాయం మరియు ఆర్థిక ఆట", unknown_phase: "తెలియని దశ", ui_switch_lang: "భాషను మార్చండి", ui_restart_game: "గేమ్‌ని పునఃప్రారంభించండి", header_savings: "పొదుపు", header_debt: "అప్పు", header_wellbeing: "శ్రేయస్సు",
@@ -178,7 +200,14 @@ const translations = {
         quiz_pmfby_q: "PMFBY పథకం మిమ్మల్ని దేని నుండి రక్షిస్తుంది?", quiz_pmfby_o1: "దొంగతనం", quiz_pmfby_o2: "ప్రకృతి విపత్తుల వలన పంట నష్టం", quiz_pmfby_o3: "వైద్య ఖర్చులు", quiz_pmfby_o4: "మార్కెట్ ధరలు తగ్గడం", quiz_pmfby_exp: "వాతావరణం లేదా తెగుళ్ల వల్ల పంట నష్టపోతే రైతులను ఆర్థికంగా ఆదుకునే పథకం PMFBY.",
         quiz_compound_q: "వడ్డీ వ్యాపారి 36% వడ్డీ ఎందుకు ప్రమాదకరం?", quiz_compound_o1: "కాगితపు పని", quiz_compound_o2: "అప్పు వేగంగా పెరుగుతుంది", quiz_compound_o3: "నగదు మాత్రమే", quiz_compound_o4: "బ్యాంకుకు తేడా లేదు", quiz_compound_exp: "అధిక వడ్డీ రుణాలు వేగంగా పెరుగుతాయి. 36% వడ్డీ రైతులను శాశ్వత అప్పుల ఊబిలో బంధిస్తుంది.",
         quiz_div_q: "'పంటల వైవిధ్యం' (Crop Diversification) అంటే ఏమిటి?", quiz_div_o1: "ఒకే పంట వేయడం", quiz_div_o2: "నష్టాన్ని తగ్గించడానికి వివిధ పంటలను పండించడం", quiz_div_o3: "వేరే మార్కెట్‌లో అమ్మడం", quiz_div_o4: "రసాయన ఎరువులు", quiz_div_exp: "వివిధ రకాల పంటలను పండించడం వల్ల ఒక పంట దెబ్బతిన్నా మరో పంట కాపాడుతుంది.",
-        quiz_inf_q: "మీ పొదుపు మొత్తాన్ని ఇంట్లో ఉంచడం ఎందుకు మంచిది కాదు?", quiz_inf_o1: "ద్రవ్యోల్బణం కారణంగా నగదు విలువ తగ్గుతుంది", quiz_inf_o2: "బ్యాంక్ ఫీజు వసూలు చేస్తుంది", quiz_inf_o3: "విత్తనాలు కొనలేము", quiz_inf_o4: "దురదృష్టం", quiz_inf_exp: "ద్రవ్యోల్బణం అంటే కాలక్రమేణా వస్తువులు ఖరీదైనవి కావడం. FD లో డబ్బు పెడితే అది పెరుగుతుంది."
+        quiz_inf_q: "మీ పొదుపు మొత్తాన్ని ఇంట్లో ఉంచడం ఎందుకు మంచిది కాదు?", quiz_inf_o1: "ద్రవ్యోల్బణం కారణంగా నగదు విలువ తగ్గుతుంది", quiz_inf_o2: "బ్యాంక్ ఫీజు వసూలు చేస్తుంది", quiz_inf_o3: "విత్తనాలు కొనలేము", quiz_inf_o4: "దురదృష్టం", quiz_inf_exp: "ద్రవ్యోల్బణం అంటే కాలక్రమేణా వస్తువులు ఖరీదైనవి కావడం. FD లో డబ్బు పెడితే అది పెరుగుతుంది.",
+        forecast_label: "వాతావరణ సూచన",
+        forecast_normal: "సాధారణ వాతావరణం",
+        forecast_drought: "కరువు వచ్చే అవకాశం ఉంది",
+        forecast_heavy_rain: "భారీ వర్షాలు కురిసే అవకాశం ఉంది",
+        forecast_good: "అద్భుతమైన వాతావరణం",
+        ui_maintenance: "ఆస్తి నిర్వహణ",
+        tts_what_do: "మీరు ఏమి చేస్తారు?", tts_option_a: "ఎంపిక 1", tts_option_b: "ఎంపిక 2", tts_cost: "ఖర్చు", tts_rupees: "రూపాయలు",
     },
     ta: {
         app_title: "கிருஷி-நீதி", credit_score: "கடன் மதிப்பெண்", season: "பருவம்", start_season: "புதிய பருவம்", goals: "இலக்குகள்", bank: "வங்கி & தங்கம்", schemes: "அரசு திட்டங்கள்", shop: "கடை", reports: "அறிக்கைகள்", profile: "சுயவிவரம்", quit: "வெளியேறு", confirm_quit: "நிச்சயமாக வெளியேற வேண்டுமா?", advisory: "கிருஷி மித்ரா ஆலோசனை", ui_back: "பின்செல்", ui_continue: "தொடரவும்", ui_confirm: "உறுதி செய்", splash_subtitle: "விவசாயம் மற்றும் நிதி விளையாட்டு", unknown_phase: "தெரியாத நிலை", ui_switch_lang: "மொழியை மாற்று", ui_restart_game: "விளையாட்டை மீண்டும் தொடங்கு", header_savings: "சேமிப்பு", header_debt: "கடன்", header_wellbeing: "நல்வாழ்வு",
@@ -216,7 +245,14 @@ const translations = {
         quiz_pmfby_q: "PMFBY திட்டம் உங்களை எதிலிருந்து பாதுகாக்கிறது?", quiz_pmfby_o1: "திருட்டு", quiz_pmfby_o2: "இயற்கை பேரழிவுகளால் ஏற்படும் பயிர் இழப்பு", quiz_pmfby_o3: "மருத்துவ செலவுகள்", quiz_pmfby_o4: "சந்தை விலை வீழ்ச்சி", quiz_pmfby_exp: "வானிலை அல்லது பூச்சிகளால் பயிர்கள் அழிந்தால் விவசாயிகளுக்கு PMFBY காப்பீடு வழங்குகிறது.",
         quiz_compound_q: "கந்து வட்டிக்காரரின் 36% வட்டி ஏன் ஆபத்தானது?", quiz_compound_o1: "காகித வேலைகள்", quiz_compound_o2: "கடன் வேகமாக வளரும் (கடன் பொறி)", quiz_compound_o3: "ரொக்கம் மட்டுமே", quiz_compound_o4: "வங்கிக்கு வித்தியாசம் இல்லை", quiz_compound_exp: "அதிக வட்டி கடன்கள் வேகமாக வளரும். 36% வட்டி விவசாயிகளை நிரந்தர கடன் வலையில் சிக்க வைக்கிறது.",
         quiz_div_q: "'பயிர் பன்முகத்தன்மை' (Crop Diversification) என்றால் என்ன?", quiz_div_o1: "ஒரே பயிர் நடுதல்", quiz_div_o2: "ஆபத்தை குறைக்க வெவ்வேறு பயிர்களை வளர்ப்பது", quiz_div_o3: "வெவ்வேறு சந்தைகளில் விற்பது", quiz_div_o4: "ரசாயன உரங்கள்", quiz_div_exp: "வெவ்வேறு பயிர்களை வளர்ப்பது, ஒரு பயிர் அழிந்தாலும் மற்றொரு பயிர் உயிர்வாழ உதவும்.",
-        quiz_inf_q: "உங்கள் சேமிப்பை வீட்டில் ரொக்கமாக வைப்பது ஏன் மோசமானது?", quiz_inf_o1: "பணவீக்கத்தால் பணத்தின் மதிப்பு குறையும்", quiz_inf_o2: "வங்கி கட்டணம் வசூலிக்கும்", quiz_inf_o3: "விதை வாங்க முடியாது", quiz_inf_o4: "துரதிர்ஷ்டம்", quiz_inf_exp: "பணவீக்கம் என்பது காலப்போக்கில் பொருட்கள் விலை உயர்வதாகும். FD-யில் பணத்தை சேமித்தால் அது வளரும்."
+        quiz_inf_q: "உங்கள் சேமிப்பை வீட்டில் ரொக்கமாக வைப்பது ஏன் மோசமானது?", quiz_inf_o1: "பணவீக்கத்தால் பணத்தின் மதிப்பு குறையும்", quiz_inf_o2: "வங்கி கட்டணம் வசூலிக்கும்", quiz_inf_o3: "விதை வாங்க முடியாது", quiz_inf_o4: "துரதிர்ஷ்டம்", quiz_inf_exp: "பணவீக்கம் என்பது காலப்போக்கில் பொருட்கள் விலை உயர்வதாகும். FD-யில் பணத்தை சேமித்தால் அது வளரும்.",
+        forecast_label: "வானிலை முன்னறிவிப்பு",
+        forecast_normal: "சாதாரண வானிலை எதிர்பார்க்கப்படுகிறது",
+        forecast_drought: "வறட்சி ஏற்பட அதிக வாய்ப்பு",
+        forecast_heavy_rain: "கனமழை எதிர்பார்க்கப்படுகிறது",
+        forecast_good: "சிறந்த வானிலை நிலைகள்",
+        ui_maintenance: "சொத்து பராமரிப்பு",
+        tts_what_do: "நீங்கள் என்ன செய்வீர்கள்?", tts_option_a: "விருப்பம் 1", tts_option_b: "விருப்பம் 2", tts_cost: "செலவு", tts_rupees: "ரூபாய்",
     }
 };
 

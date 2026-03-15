@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useGame } from '../context/game-context';
 import { useLanguage } from '../context/language-context'; // NEW
 import { CloudRain, AlertTriangle, TrendingDown, Bug, HeartPulse, Tractor } from 'lucide-react';
-import { FarmVisualizer } from '../components/farm-visualizer';
+import { FarmVisualizer } from '../components/farm-visualizer'; 
 import { SpeakerButton } from '../components/speaker-button';
 
 export const EventScreen = () => {
@@ -38,8 +38,8 @@ export const EventScreen = () => {
   };
   const phaseIdx = getPhaseIndex();
   
-  // TTS reads the translated text!
-  const textToRead = `${t(evt.titleKey)}. ${t(evt.descKey)}. ${t('ui_what_do')} Option A: ${t(evt.choiceA.labelKey)}, cost ${evt.choiceA.cost}. Option B: ${t(evt.choiceB.labelKey)}, cost ${evt.choiceB.cost}.`;
+  // COMPLETELY TRANSLATED TTS STRING
+  const textToRead = `${t(evt.titleKey)}. ${t(evt.descKey)}. ${t('tts_what_do')} ${t('tts_option_a')}: ${t(evt.choiceA.labelKey)}, ${t('tts_cost')} ${evt.choiceA.cost} ${t('tts_rupees')}. ${t('tts_option_b')}: ${t(evt.choiceB.labelKey)}, ${t('tts_cost')} ${evt.choiceB.cost} ${t('tts_rupees')}.`;
 
   return (
     <div className={`h-full flex flex-col bg-game-bg animate-fade-in overflow-y-auto`}>
@@ -69,18 +69,26 @@ export const EventScreen = () => {
         </div>
 
         <div className="space-y-4 pb-10">
-            <h3 className="text-center font-bold text-gray-700">{t('ui_what_do')}</h3>
+            <h3 className="text-center font-bold text-gray-700">{t('tts_what_do')}</h3>
             
             <button 
-                onClick={() => dispatch({ type: 'RESOLVE_EVENT_CHOICE', payload: { cost: evt.choiceA.cost, wellbeing: evt.choiceA.mitigatedWellbeing || 0 } })}
+                onClick={() => dispatch({ 
+                    type: 'RESOLVE_EVENT_CHOICE', 
+                    payload: { cost: evt.choiceA.cost, wellbeing: evt.choiceA.mitigatedWellbeing || 0 } 
+                })}
                 className="w-full py-4 rounded-xl font-bold text-white shadow-md text-left px-6 flex justify-between bg-game-primary hover:bg-game-primaryDark transition-all active:scale-95"
             >
                 <span>{t(evt.choiceA.labelKey)}</span>
-                <span className="opacity-90 bg-black/20 px-2 py-1 rounded text-sm">-₹{evt.choiceA.cost}</span>
+                <span className="opacity-90 bg-black/20 px-2 py-1 rounded text-sm">
+                    -₹{evt.choiceA.cost}
+                </span>
             </button>
 
             <button 
-                onClick={() => dispatch({ type: 'RESOLVE_EVENT_CHOICE', payload: { cost: evt.choiceB.cost, wellbeing: 0 } })}
+                onClick={() => dispatch({ 
+                    type: 'RESOLVE_EVENT_CHOICE', 
+                    payload: { cost: evt.choiceB.cost, wellbeing: 0 } 
+                })}
                 className="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold shadow-sm text-left px-6 flex justify-between hover:bg-gray-50 active:scale-95"
             >
                 <span>{t(evt.choiceB.labelKey)}</span>

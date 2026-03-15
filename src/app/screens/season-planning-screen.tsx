@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useGame } from '../context/game-context';
 import { useLanguage } from '../context/language-context';
 import { CROPS, LOANS, INSURANCES } from '../data/game-scenarios';
-import { Shield, Coins, Ruler, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Shield, Coins, Ruler, AlertTriangle, ArrowLeft, CloudRain } from 'lucide-react';
 import clsx from 'clsx';
 import { FarmVisualizer } from '../components/farm-visualizer';
 
@@ -72,10 +72,19 @@ export const SeasonPlanningScreen = () => {
         <div className="flex-grow p-4 md:p-8 pb-24 md:pb-8 overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2 text-xs text-gray-500 font-medium mt-1">
-                    <Ruler className="w-3 h-3" /> {acres.toFixed(1)} Acres
+                    <Ruler className="w-3 h-3" /> {acres.toFixed(1)} {t('ui_acres')}
                 </div>
                 <div className="bg-white px-4 py-2 rounded-full shadow text-sm md:text-base font-mono font-bold text-game-primaryDark">
-                    ₹{state.savings.toLocaleString()} Avail
+                    ₹{state.savings.toLocaleString()}
+                </div>
+            </div>
+
+            {/* NEW: WEATHER FORECAST BANNER */}
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-6 flex items-center gap-3 shadow-sm">
+                <CloudRain className="w-8 h-8 text-blue-500" />
+                <div>
+                    <div className="text-xs font-bold text-blue-800 uppercase tracking-wider">{t('forecast_label')}</div>
+                    <div className="text-sm font-bold text-blue-900">{t(state.weatherForecast || 'forecast_normal')}</div>
                 </div>
             </div>
 
@@ -211,7 +220,7 @@ export const SeasonPlanningScreen = () => {
                 onClick={handleConfirm}
                 className="w-full bg-game-primary hover:bg-game-primaryDark text-white py-4 rounded-xl font-bold text-lg shadow-lg transition-transform hover:scale-[1.02]"
             >
-                {t('Confirm')}
+                {t('ui_confirm')}
             </button>
         </div>
     </div>
