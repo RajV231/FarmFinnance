@@ -46,6 +46,7 @@ export interface GameState {
   achievedGoals: string[];
   bankBalance: { fixedDeposit: number; fdMaturitySeason: number; goldGrams: number };
   dbtBalance: number;
+  currentGoldPrice: number; // NEW: Tracks the dynamic market price of gold
 
   // NEW: Education Engine State
   activeQuiz: QuizQuestion | null;
@@ -95,6 +96,7 @@ const INITIAL_STATE: GameState = {
   achievedGoals: [],
   bankBalance: { fixedDeposit: 0, fdMaturitySeason: 0, goldGrams: 0 },
   dbtBalance: 0,
+  currentGoldPrice: 6200, // NEW: Starts at ₹6,200 per gram in Season 1
 
   // NEW: Initialize quiz state
   activeQuiz: null,
@@ -318,12 +320,19 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         return { ...state, savings: state.savings + amount, bankBalance: { ...state.bankBalance, goldGrams: state.bankBalance.goldGrams - grams } };
       }
       if (type === "PAY_LAND_PRINCIPAL") {
-          if(state.savings < amount) return state;
-          let newPrincipal = Math.max(0, state.landLoan.principal - amount);
-          let newEmi = newPrincipal === 0 ? 0 : state.landLoan.seasonEmi;
+          // CAP THE PAYMENT: Ensure they can't pay more than they owe!
+          const actualPayment = Math.min(amount, state.landLoan.principal); 
+          
+          if(state.savings < actualPayment) return state;
+          
+          let newPrincipal = Math.max(0, state.landLoan.principal - actualPayment);
+          
+          // REDUCING BALANCE EMI: Recalculate EMI instantly based on new principal
+          let newEmi = newPrincipal === 0 ? 0 : Math.ceil(newPrincipal / 20); 
+          
           return {
               ...state,
-              savings: state.savings - amount,
+              savings: state.savings - actualPayment,
               landLoan: { ...state.landLoan, principal: newPrincipal, seasonEmi: newEmi }
           };
       }
@@ -382,22 +391,36 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         if (evt.financialImpact) directCashHit = Math.abs(evt.financialImpact);
       }
 
-      const nextSavings = state.savings - realCost - directCashHit;
+      let nextSavings = state.savings - realCost - directCashHit;
+      let newDebt = state.debt;
+
+      // FIX: If an event drains your savings below 0, you go into debt!
+      if (nextSavings < 0) {
+          newDebt += Math.abs(nextSavings);
+          nextSavings = 0;
+      }
+
       const nextYield = state.cumulativeYield * impactYield;
       const nextPrice = state.cumulativePrice * impactPrice;
       const nextWellbeing = Math.max(0, Math.min(100, state.wellbeing + action.payload.wellbeing + impactWellbeing));
       const nextLog = [...state.seasonEventsLog, evt.titleKey];
       const nextFinancialHits = state.seasonFinancialHits + directCashHit;
 
-      // Transition to MARKET instead of HARVEST
       let nextPhase: GamePhase = "MARKET"; 
       if (state.phase === "EVENT_EARLY") nextPhase = "EVENT_MID";
       else if (state.phase === "EVENT_MID") nextPhase = "EVENT_LATE";
 
       return {
-        ...state, savings: nextSavings, cumulativeYield: nextYield, cumulativePrice: nextPrice,
-        wellbeing: nextWellbeing, seasonEventsLog: nextLog, seasonFinancialHits: nextFinancialHits,
-        phase: nextPhase, currentEvent: null,
+        ...state, 
+        savings: nextSavings, 
+        debt: newDebt, // <--- SAVES THE OVERDRAFT DEBT
+        cumulativeYield: nextYield, 
+        cumulativePrice: nextPrice,
+        wellbeing: nextWellbeing, 
+        seasonEventsLog: nextLog, 
+        seasonFinancialHits: nextFinancialHits,
+        phase: nextPhase, 
+        currentEvent: null,
       };
     } // End of RESOLVE_EVENT_CHOICE case
 
@@ -415,23 +438,51 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
     case "REPAY_LOAN": {
       const { amount, type } = action.payload;
+      
+      // CAP THE PAYMENT: Ensure they can't overpay crop loans either!
+      const actualPayment = Math.min(amount, state.debt); 
+
       let scoreChange = 0;
       if (type === "FULL") scoreChange = 50;
       if (type === "PARTIAL") scoreChange = -10;
       if (type === "DEFAULT") scoreChange = -100;
 
-      const remainingDebt = Math.max(0, state.debt - amount);
+      const remainingDebt = Math.max(0, state.debt - actualPayment);
       const newScore = Math.min(900, Math.max(300, state.creditScore + scoreChange));
       const phaseAfterRepay = remainingDebt === 0 ? "HARVEST" : "RESILIENCE";
 
-      return { ...state, debt: remainingDebt, savings: state.savings - amount, creditScore: newScore, phase: phaseAfterRepay };
+      return { ...state, debt: remainingDebt, savings: state.savings - actualPayment, creditScore: newScore, phase: phaseAfterRepay };
     }
 
     case "SHOW_RESILIENCE": return { ...state, phase: "RESILIENCE" };
 
     case "NEXT_SEASON":
-        if (state.debt > 200000) return { ...state, phase: 'GAME_LOSS' };
-        if (state.seasonNumber >= state.maxSeasons) return { ...state, phase: "SUMMARY" };
+        // 1. Prevent massive debt buildup mid-game
+        if (state.debt + state.landLoan.principal > 500000) return { ...state, phase: 'GAME_LOSS' };
+        
+        // 2. THE DAY OF RECKONING: Bank collects all debts at the end of Season 10
+        if (state.seasonNumber >= state.maxSeasons) {
+            let finalSavings = state.savings;
+            let finalDebt = state.debt + state.landLoan.principal;
+
+            // Bank forcibly takes its money from your savings
+            if (finalSavings >= finalDebt) {
+                finalSavings -= finalDebt;
+                finalDebt = 0;
+            } else {
+                finalDebt -= finalSavings;
+                finalSavings = 0;
+            }
+
+            // If debt still exists after emptying savings, you lose the game!
+            return { 
+                ...state, 
+                savings: finalSavings,
+                debt: finalDebt,
+                landLoan: { ...state.landLoan, principal: 0, seasonEmi: 0 },
+                phase: finalDebt > 0 ? 'GAME_LOSS' : 'SUMMARY' 
+            };
+        }
 
         let maturedamount = 0;
         let newFD = state.bankBalance.fixedDeposit;
@@ -439,18 +490,21 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             maturedamount = Math.floor(state.bankBalance.fixedDeposit * 1.1); 
             newFD = 0; 
         }
-        // PM-KISAN LOGIC
+        
         const dbt = state.activeSchemes.includes('pm_kisan') ? 2000 : 0; 
 
         let newSavings = state.savings + maturedamount + dbt;
         let newLandLoan = { ...state.landLoan };
         let penaltyDebt = 0;
 
+        // 3. APPLY REDUCING BALANCE EMI TO AUTOMATIC DEDUCTIONS
         if (state.landLoan.principal > 0) {
             if (newSavings >= state.landLoan.seasonEmi) {
                 newSavings -= state.landLoan.seasonEmi;
                 newLandLoan.principal = Math.max(0, newLandLoan.principal - (state.landLoan.seasonEmi * 0.7)); 
-                if(newLandLoan.principal === 0) newLandLoan.seasonEmi = 0;
+                
+                // REDUCING BALANCE: Update the EMI for the next season!
+                newLandLoan.seasonEmi = newLandLoan.principal > 0 ? Math.ceil(newLandLoan.principal / 20) : 0;
             } else {
                 penaltyDebt = 5000;
                 newLandLoan.missedPayments += 1;
@@ -467,11 +521,17 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         const forecasts = ['forecast_normal', 'forecast_drought', 'forecast_heavy_rain', 'forecast_good'];
         const nextForecast = forecasts[Math.floor(Math.random() * forecasts.length)];
 
+        // NEW: DYNAMIC GOLD MARKET
+        // Gold increases by a random amount between 2% and 7% every season!
+        const goldGrowthRate = 1.02 + (Math.random() * 0.05);
+        const newGoldPrice = Math.floor(state.currentGoldPrice * goldGrowthRate);
+
         return {
             ...state,
             seasonNumber: state.seasonNumber + 1,
             phase: "DASHBOARD",
             savings: newSavings,
+            currentGoldPrice: newGoldPrice, // <-- ADD THIS TO THE RETURN PAYLOAD
             weatherForecast: nextForecast, // NEW
             debt: state.debt + penaltyDebt,
             bankBalance: { ...state.bankBalance, fixedDeposit: newFD },

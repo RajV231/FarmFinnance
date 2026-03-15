@@ -8,25 +8,24 @@ export const AdvisorBot = () => {
     const { state } = useGame();
     const { t } = useLanguage();
     
-    // Engine now returns { key: string, val?: number }
     const tip = getAdvisorTip(state);
     
-    // We fetch the translated string, and replace {val} if the engine passed a number!
     let translatedTip = t(tip.key);
     if (tip.val !== undefined) {
         translatedTip = translatedTip.replace('{val}', tip.val.toLocaleString());
     }
 
     return (
-        <div className="bg-gradient-to-r from-emerald-800 to-green-700 rounded-2xl p-4 shadow-lg mb-6 flex items-start gap-4 text-white animate-fade-in border border-green-600">
-            <div className="bg-white/20 p-2 rounded-full shrink-0 mt-1 shadow-sm">
-                <Bot className="w-6 h-6 text-green-100" />
+        <div className="bg-gradient-to-r from-emerald-700 to-green-600 rounded-3xl p-5 shadow-lg flex items-start gap-4 text-white animate-fade-in border-2 border-green-500/30">
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-2xl shrink-0 shadow-md">
+                <Bot className="w-6 h-6 text-white" />
             </div>
-            <div>
-                <h3 className="font-bold text-sm text-green-100 mb-1 flex items-center gap-1.5 uppercase tracking-wider">
-                    <Sparkles className="w-3 h-3" /> {t('advisory')} 
-                </h3>
-                <p className="text-sm leading-relaxed text-white/95 font-medium">
+            <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="w-4 h-4 text-green-200" />
+                    <h3 className="font-bold text-sm text-green-100 uppercase tracking-wider">{t('advisory')}</h3>
+                </div>
+                <p className="text-sm leading-relaxed text-white font-medium">
                     {translatedTip}
                 </p>
             </div>

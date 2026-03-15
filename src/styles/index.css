@@ -1,22 +1,137 @@
+/* Main CSS file - Replace your existing index.css or App.css with this */
+
+/* Import Tailwind base, components, and utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Import the KishanGem design system */
+@import './styles/design-system.css';
+
+/* Base styles */
 @layer base {
+  html, body {
+    @apply h-full;
+  }
+  
   body {
-    /* We use the hex code directly here to avoid the build error */
-    background-color: #f0f4f0;
-    color: #1f2937;
-    -webkit-font-smoothing: antialiased;
+    @apply font-sans antialiased;
+    margin: 0;
+    padding: 0;
+  }
+
+  #root {
+    @apply h-full;
+  }
+
+  * {
+    box-sizing: border-box;
   }
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+/* Custom utilities */
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Custom gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent;
+  }
+
+  /* Glass effect utility */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Safe area for mobile devices */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* Component-specific styles */
+@layer components {
+  /* Button base styles */
+  .btn {
+    @apply font-bold py-2 px-4 rounded-lg transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg hover:from-green-700 hover:to-emerald-700 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-white border-2 border-gray-200 text-gray-700 hover:border-green-500 active:scale-95;
+  }
+
+  /* Card base styles */
+  .card {
+    @apply bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden;
+  }
+
+  .card-header {
+    @apply p-5 text-white;
+  }
+
+  .card-body {
+    @apply p-5;
+  }
+
+  /* Input styles */
+  .input {
+    @apply border-2 border-gray-200 p-3 rounded-xl focus:border-green-500 focus:outline-none transition-colors;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-700;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-700;
+  }
+
+  .badge-error {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-700;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    @apply border-2;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
