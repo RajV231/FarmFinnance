@@ -33,8 +33,8 @@ export const EducationPopup = () => {
     const isCorrect = selected === quiz.correctIndex;
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 pb-8 animate-fade-in">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[85vh] overflow-y-auto flex flex-col animate-scale-in">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white relative">
                     <button 
