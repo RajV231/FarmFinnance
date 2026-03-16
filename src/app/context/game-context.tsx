@@ -11,6 +11,15 @@ export type GamePhase =
   | "PLANNING" | "EVENT_EARLY" | "EVENT_MID" | "EVENT_LATE"
   | "MARKET" | "HARVEST" | "RESILIENCE" | "GAME_WIN" | "GAME_LOSS" | "SUMMARY"; // Added MARKET
 
+export interface Transaction {
+  id: string;
+  season: number;
+  amount: number;
+  type: 'INCOME' | 'EXPENSE';
+  category: 'FARMING' | 'ASSET' | 'BANK' | 'HARVEST' | 'EVENT' | 'GOAL';
+  descKey: string;
+}
+
 export interface GameState {
   seasonNumber: number;
   maxSeasons: number;
@@ -54,6 +63,7 @@ export interface GameState {
 
   activeSchemes: string[];
   weatherForecast: string; // NEW: Weather Forecast State
+  transactions: Transaction[];
 
   cumulativeYield: number;
   cumulativePrice: number;
@@ -104,6 +114,7 @@ const INITIAL_STATE: GameState = {
 
   activeSchemes: [],
   weatherForecast: 'forecast_normal', // Default forecast
+  transactions: [],
 
   phase: "SPLASH",
   currentCrop: null,
@@ -203,24 +214,27 @@ const performHarvestCalculation = (state: GameState, mandiMultiplier: number, tr
     insurancePayout = Math.floor(expectedRevenue * state.currentInsurance!.coverage);
   }
 
-  let liquidCash = state.savings + grossIncome + insurancePayout;
+  // FIX: Properly subtract transport and maintenance from the final cash!
+  let liquidCash = state.savings + grossIncome + insurancePayout - totalTransportCost - assetMaintenanceCost;
   let newDebt = state.debt + state.currentLoanAmount + interestAmount;
   if (liquidCash < 0) { newDebt += Math.abs(liquidCash); liquidCash = 0; }
 
   const isSpiral = detectPovertySpiral(newDebt, 50000 * acres);
   const resilienceData = calculateResilienceScore(liquidCash, newDebt, state.wellbeing, state.currentInsurance?.id !== "none");
 
+  // Generate Transaction Logs for Harvest
+  const newTxs: Transaction[] = [];
+  if (grossIncome > 0) newTxs.push({ id: Date.now().toString()+'h', season: state.seasonNumber, amount: grossIncome, type: 'INCOME', category: 'HARVEST', descKey: 'tx_cat_harvest' });
+  if (insurancePayout > 0) newTxs.push({ id: Date.now().toString()+'i', season: state.seasonNumber, amount: insurancePayout, type: 'INCOME', category: 'HARVEST', descKey: 'tx_ins_payout' });
+  if (totalTransportCost > 0) newTxs.push({ id: Date.now().toString()+'t', season: state.seasonNumber, amount: totalTransportCost, type: 'EXPENSE', category: 'HARVEST', descKey: 'tx_transport' });
+  if (assetMaintenanceCost > 0) newTxs.push({ id: Date.now().toString()+'m', season: state.seasonNumber, amount: assetMaintenanceCost, type: 'EXPENSE', category: 'ASSET', descKey: 'tx_maintenance' });
+
   return {
     savings: liquidCash, debt: newDebt, resilienceScore: resilienceData.total, resilienceBreakdown: resilienceData.breakdown,
     isPovertySpiral: isSpiral, 
-    lastHarvestStats: { 
-        grossIncome, totalExpenses, netProfit: grossIncome + insurancePayout - totalExpenses, 
-        yieldPercentage: totalYieldDrop * 100, insurancePayout, loanInterestPaid: interestAmount, 
-        eventCost: state.seasonFinancialHits,
-        mandiName, transportCost: totalTransportCost,
-        assetMaintenanceCost // NEW
-    },
+    lastHarvestStats: { grossIncome, totalExpenses, netProfit: grossIncome + insurancePayout - totalExpenses, yieldPercentage: totalYieldDrop * 100, insurancePayout, loanInterestPaid: interestAmount, eventCost: state.seasonFinancialHits, mandiName, transportCost: totalTransportCost, assetMaintenanceCost },
     history: [...state.history, { season: state.seasonNumber, income: grossIncome, resilience: resilienceData.total }],
+    transactions: [...newTxs, ...state.transactions] // Attach new logs
   };
 };
 
@@ -257,10 +271,15 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     // NEW EDUCATIONAL ENGINE ACTIONS
     case "ANSWER_QUIZ": {
         const { isCorrect, reward, quizId } = action.payload;
+        const newTxs = [...state.transactions];
+        if (isCorrect && reward > 0) {
+            newTxs.unshift({ id: Date.now().toString(), season: state.seasonNumber, amount: reward, type: 'INCOME', category: 'FARMING', descKey: 'tx_quiz_reward' });
+        }
         return {
             ...state,
             savings: state.savings + (isCorrect ? reward : 0),
-            completedQuizzes: [...state.completedQuizzes, quizId]
+            completedQuizzes: [...state.completedQuizzes, quizId],
+            transactions: newTxs
         };
     }
     case "CLOSE_QUIZ": 
@@ -273,7 +292,9 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       if (state.activeSchemes.includes('smam') && action.payload.id === 'mini_tractor') finalCost *= 0.5;
 
       if (state.savings < finalCost) return state;
-      return { ...state, savings: state.savings - finalCost, ownedAssets: [...state.ownedAssets, action.payload.id] };
+      
+      const newTx: Transaction = { id: Date.now().toString(), season: state.seasonNumber, amount: finalCost, type: 'EXPENSE', category: 'ASSET', descKey: action.payload.nameKey };
+      return { ...state, savings: state.savings - finalCost, ownedAssets: [...state.ownedAssets, action.payload.id], transactions: [newTx, ...state.transactions] };
     }
 
     case "BUY_LAND": {
@@ -282,16 +303,14 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         
         const loanAmount = cost - downPayment;
         const emi = Math.ceil(loanAmount / 20); 
+        const newTx: Transaction = { id: Date.now().toString(), season: state.seasonNumber, amount: downPayment, type: 'EXPENSE', category: 'ASSET', descKey: 'tx_land_buy' };
 
         return {
             ...state,
             savings: state.savings - downPayment,
             totalAcres: state.totalAcres + acres,
-            landLoan: {
-                principal: state.landLoan.principal + loanAmount,
-                seasonEmi: state.landLoan.seasonEmi + emi,
-                missedPayments: state.landLoan.missedPayments
-            },
+            landLoan: { principal: state.landLoan.principal + loanAmount, seasonEmi: state.landLoan.seasonEmi + emi, missedPayments: state.landLoan.missedPayments },
+            transactions: [newTx, ...state.transactions],
             phase: 'DASHBOARD'
         };
     }
@@ -299,42 +318,46 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     case "ACHIEVE_GOAL": {
         const { goal, isMain } = action.payload;
         if (state.savings < goal.targetAmount) return state;
-        const newSavings = state.savings - goal.targetAmount;
-        const newGoals = [...state.achievedGoals, goal.id];
-        const nextPhase = isMain ? "GAME_WIN" : "GOALS"; 
-        return { ...state, savings: newSavings, achievedGoals: newGoals, phase: nextPhase };
+        
+        const newTx: Transaction = { id: Date.now().toString(), season: state.seasonNumber, amount: goal.targetAmount, type: 'EXPENSE', category: 'GOAL', descKey: goal.nameKey };
+
+        return { 
+            ...state, 
+            savings: state.savings - goal.targetAmount, 
+            achievedGoals: [...state.achievedGoals, goal.id], 
+            transactions: [newTx, ...state.transactions],
+            phase: "GOALS" 
+        };
     }
 
     case "BANK_TRANSACTION": {
       const { type, amount, grams } = action.payload;
+      const newTxs = [...state.transactions];
+
       if (type === "DEPOSIT_FD") {
         if (state.savings < amount) return state;
-        return { ...state, savings: state.savings - amount, bankBalance: { ...state.bankBalance, fixedDeposit: state.bankBalance.fixedDeposit + amount, fdMaturitySeason: state.seasonNumber + 2 } };
+        newTxs.unshift({ id: Date.now().toString(), season: state.seasonNumber, amount, type: 'EXPENSE', category: 'BANK', descKey: 'tx_fd_deposit' });
+        return { ...state, savings: state.savings - amount, bankBalance: { ...state.bankBalance, fixedDeposit: state.bankBalance.fixedDeposit + amount, fdMaturitySeason: state.seasonNumber + 2 }, transactions: newTxs };
       }
       if (type === "BUY_GOLD") {
         if (state.savings < amount || !grams) return state;
-        return { ...state, savings: state.savings - amount, bankBalance: { ...state.bankBalance, goldGrams: state.bankBalance.goldGrams + grams } };
+        newTxs.unshift({ id: Date.now().toString(), season: state.seasonNumber, amount, type: 'EXPENSE', category: 'BANK', descKey: 'tx_gold_buy' });
+        return { ...state, savings: state.savings - amount, bankBalance: { ...state.bankBalance, goldGrams: state.bankBalance.goldGrams + grams }, transactions: newTxs };
       }
       if (type === "SELL_GOLD") {
         if (!grams || state.bankBalance.goldGrams < grams) return state;
-        return { ...state, savings: state.savings + amount, bankBalance: { ...state.bankBalance, goldGrams: state.bankBalance.goldGrams - grams } };
+        newTxs.unshift({ id: Date.now().toString(), season: state.seasonNumber, amount, type: 'INCOME', category: 'BANK', descKey: 'tx_gold_sell' });
+        return { ...state, savings: state.savings + amount, bankBalance: { ...state.bankBalance, goldGrams: state.bankBalance.goldGrams - grams }, transactions: newTxs };
       }
       if (type === "PAY_LAND_PRINCIPAL") {
-          // CAP THE PAYMENT: Ensure they can't pay more than they owe!
           const actualPayment = Math.min(amount, state.landLoan.principal); 
-          
           if(state.savings < actualPayment) return state;
           
+          newTxs.unshift({ id: Date.now().toString(), season: state.seasonNumber, amount: actualPayment, type: 'EXPENSE', category: 'BANK', descKey: 'tx_land_repay' });
           let newPrincipal = Math.max(0, state.landLoan.principal - actualPayment);
-          
-          // REDUCING BALANCE EMI: Recalculate EMI instantly based on new principal
           let newEmi = newPrincipal === 0 ? 0 : Math.ceil(newPrincipal / 20); 
           
-          return {
-              ...state,
-              savings: state.savings - actualPayment,
-              landLoan: { ...state.landLoan, principal: newPrincipal, seasonEmi: newEmi }
-          };
+          return { ...state, savings: state.savings - actualPayment, landLoan: { ...state.landLoan, principal: newPrincipal, seasonEmi: newEmi }, transactions: newTxs };
       }
       return state;
     }
@@ -354,7 +377,18 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       const upfrontCost = totalCropCost + totalInsuranceCost;
       const liquidCash = savingsAllocated + loanAmount;
       const finalCashForSeason = Math.max(0, liquidCash - upfrontCost + (state.savings - savingsAllocated)); 
-      return { ...state, currentCrop: crop, currentLoan: loan, currentLoanAmount: loanAmount, currentInsurance: insurance, phase: "EVENT_EARLY", savings: finalCashForSeason, cumulativeYield: 1.0, cumulativePrice: 1.0, seasonEventsLog: [], seasonFinancialHits: 0 };
+      
+      const newTxs = [...state.transactions];
+      // Log Upfront Spending
+      if (upfrontCost > 0) {
+          newTxs.unshift({ id: Date.now().toString()+'exp', season: state.seasonNumber, amount: upfrontCost, type: 'EXPENSE', category: 'FARMING', descKey: 'tx_cat_farming' });
+      }
+      // Log Loan Money Received
+      if (loanAmount > 0) {
+          newTxs.unshift({ id: Date.now().toString()+'loan', season: state.seasonNumber, amount: loanAmount, type: 'INCOME', category: 'BANK', descKey: 'tx_loan_disburse' });
+      }
+      
+      return { ...state, currentCrop: crop, currentLoan: loan, currentLoanAmount: loanAmount, currentInsurance: insurance, phase: "EVENT_EARLY", savings: finalCashForSeason, cumulativeYield: 1.0, cumulativePrice: 1.0, seasonEventsLog: [], seasonFinancialHits: 0, transactions: newTxs };
     }
 
     case "TRIGGER_EVENT":
@@ -391,55 +425,45 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         if (evt.financialImpact) directCashHit = Math.abs(evt.financialImpact);
       }
 
+      // FIX: Allow savings to go perfectly NEGATIVE (Overdraft).
+      // The Harvest Screen math will automatically subtract this negative balance from your Gross Income!
       let nextSavings = state.savings - realCost - directCashHit;
-      let newDebt = state.debt;
+      let newDebt = state.debt; 
 
-      // FIX: If an event drains your savings below 0, you go into debt!
-      if (nextSavings < 0) {
-          newDebt += Math.abs(nextSavings);
-          nextSavings = 0;
+      const newTxs = [...state.transactions];
+      const totalEventCost = realCost + directCashHit;
+      if (totalEventCost > 0) {
+          newTxs.unshift({ id: Date.now().toString(), season: state.seasonNumber, amount: totalEventCost, type: 'EXPENSE', category: 'EVENT', descKey: evt.titleKey });
       }
 
       const nextYield = state.cumulativeYield * impactYield;
       const nextPrice = state.cumulativePrice * impactPrice;
       const nextWellbeing = Math.max(0, Math.min(100, state.wellbeing + action.payload.wellbeing + impactWellbeing));
-      const nextLog = [...state.seasonEventsLog, evt.titleKey];
-      const nextFinancialHits = state.seasonFinancialHits + directCashHit;
-
+      
       let nextPhase: GamePhase = "MARKET"; 
       if (state.phase === "EVENT_EARLY") nextPhase = "EVENT_MID";
       else if (state.phase === "EVENT_MID") nextPhase = "EVENT_LATE";
 
       return {
-        ...state, 
-        savings: nextSavings, 
-        debt: newDebt, // <--- SAVES THE OVERDRAFT DEBT
-        cumulativeYield: nextYield, 
-        cumulativePrice: nextPrice,
-        wellbeing: nextWellbeing, 
-        seasonEventsLog: nextLog, 
-        seasonFinancialHits: nextFinancialHits,
-        phase: nextPhase, 
-        currentEvent: null,
+        ...state, savings: nextSavings, debt: newDebt, cumulativeYield: nextYield, cumulativePrice: nextPrice, wellbeing: nextWellbeing, seasonEventsLog: [...state.seasonEventsLog, evt.titleKey], seasonFinancialHits: state.seasonFinancialHits + directCashHit, phase: nextPhase, currentEvent: null, transactions: newTxs
       };
     } // End of RESOLVE_EVENT_CHOICE case
 
     // ADD THIS BRAND NEW CASE IMMEDIATELY AFTER RESOLVE_EVENT_CHOICE:
     case "SELL_CROP": {
         const { priceMultiplier, transportCostPerAcre, mandiName } = action.payload;
-        // Trigger the math now that we know where they are selling
+        // This function handles ALL the math AND the transaction logging now!
         const harvestResults = performHarvestCalculation(state, priceMultiplier, transportCostPerAcre, mandiName);
+        
         return {
             ...state,
-            ...harvestResults,
+            ...harvestResults, // This perfectly merges the new transactions into the state
             phase: "HARVEST"
         };
     }
 
     case "REPAY_LOAN": {
       const { amount, type } = action.payload;
-      
-      // CAP THE PAYMENT: Ensure they can't overpay crop loans either!
       const actualPayment = Math.min(amount, state.debt); 
 
       let scoreChange = 0;
@@ -447,11 +471,16 @@ const gameReducer = (state: GameState, action: Action): GameState => {
       if (type === "PARTIAL") scoreChange = -10;
       if (type === "DEFAULT") scoreChange = -100;
 
+      const newTxs = [...state.transactions];
+      if (actualPayment > 0) {
+          newTxs.unshift({ id: Date.now().toString(), season: state.seasonNumber, amount: actualPayment, type: 'EXPENSE', category: 'BANK', descKey: 'tx_crop_repay' });
+      }
+
       const remainingDebt = Math.max(0, state.debt - actualPayment);
       const newScore = Math.min(900, Math.max(300, state.creditScore + scoreChange));
       const phaseAfterRepay = remainingDebt === 0 ? "HARVEST" : "RESILIENCE";
 
-      return { ...state, debt: remainingDebt, savings: state.savings - actualPayment, creditScore: newScore, phase: phaseAfterRepay };
+      return { ...state, debt: remainingDebt, savings: state.savings - actualPayment, creditScore: newScore, phase: phaseAfterRepay, transactions: newTxs };
     }
 
     case "SHOW_RESILIENCE": return { ...state, phase: "RESILIENCE" };
@@ -497,13 +526,19 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         let newLandLoan = { ...state.landLoan };
         let penaltyDebt = 0;
 
+        const newTxs = [...state.transactions];
+        
+        // Log Income from Automatics
+        if (maturedamount > 0) newTxs.unshift({ id: Date.now().toString()+'fd', season: state.seasonNumber, amount: maturedamount, type: 'INCOME', category: 'BANK', descKey: 'tx_fd_maturity' });
+        if (dbt > 0) newTxs.unshift({ id: Date.now().toString()+'dbt', season: state.seasonNumber, amount: dbt, type: 'INCOME', category: 'BANK', descKey: 'tx_pm_kisan' });
+
         // 3. APPLY REDUCING BALANCE EMI TO AUTOMATIC DEDUCTIONS
         if (state.landLoan.principal > 0) {
             if (newSavings >= state.landLoan.seasonEmi) {
                 newSavings -= state.landLoan.seasonEmi;
+                newTxs.unshift({ id: Date.now().toString()+'emi', season: state.seasonNumber, amount: state.landLoan.seasonEmi, type: 'EXPENSE', category: 'BANK', descKey: 'tx_land_emi' });
+
                 newLandLoan.principal = Math.max(0, newLandLoan.principal - (state.landLoan.seasonEmi * 0.7)); 
-                
-                // REDUCING BALANCE: Update the EMI for the next season!
                 newLandLoan.seasonEmi = newLandLoan.principal > 0 ? Math.ceil(newLandLoan.principal / 20) : 0;
             } else {
                 penaltyDebt = 5000;
@@ -531,17 +566,20 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             seasonNumber: state.seasonNumber + 1,
             phase: "DASHBOARD",
             savings: newSavings,
-            currentGoldPrice: newGoldPrice, // <-- ADD THIS TO THE RETURN PAYLOAD
-            weatherForecast: nextForecast, // NEW
+            currentGoldPrice: newGoldPrice, 
+            weatherForecast: nextForecast, 
             debt: state.debt + penaltyDebt,
             bankBalance: { ...state.bankBalance, fixedDeposit: newFD },
             dbtBalance: state.dbtBalance + dbt,
             landLoan: newLandLoan,
-            activeQuiz: newQuiz, // <-- Add activeQuiz to the state payload
+            activeQuiz: newQuiz, 
             
             currentCrop: null, currentLoan: null, currentEvent: null,
             cumulativeYield: 1.0, cumulativePrice: 1.0, 
-            seasonEventsLog: [], seasonFinancialHits: 0
+            seasonEventsLog: [], seasonFinancialHits: 0,
+            
+            // FIX: Don't forget to save the transactions to the state!
+            transactions: newTxs 
         };
 
     case "RESET_GAME": clearGame(); return INITIAL_STATE;

@@ -11,23 +11,23 @@ export const MarketScreen = () => {
     const mandis = useMemo(() => generateMarketOptions(), [state.seasonNumber]);
 
     if (!state.currentCrop) {
-    return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
-            <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
-                <AlertCircle className="w-10 h-10 text-orange-500" />
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                    <AlertCircle className="w-10 h-10 text-orange-500" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('market_no_harvest')}</h2>
+                <p className="text-gray-500 mb-8 max-w-sm leading-relaxed">{t('market_no_harvest_desc')}</p>
+                <button 
+                    onClick={() => dispatch({ type: 'GO_TO_DASHBOARD' })}
+                    className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:from-orange-700 hover:to-amber-700 active:scale-95 transition-all shadow-lg"
+                >
+                    <ArrowRight className="w-5 h-5 rotate-180" />
+                    {t('market_return')}
+                </button>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Active Harvest</h2>
-            <p className="text-gray-500 mb-8 max-w-sm leading-relaxed">There is no crop ready for the market right now. Start a new season to plant and grow crops.</p>
-            <button 
-                onClick={() => dispatch({ type: 'GO_TO_DASHBOARD' })}
-                className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:from-orange-700 hover:to-amber-700 active:scale-95 transition-all shadow-lg"
-            >
-                <ArrowRight className="w-5 h-5 rotate-180" />
-                Return to Dashboard
-            </button>
-        </div>
-    );
-}
+        );
+    }
 
     const estimatedYieldUnits = state.currentCrop.minYield * state.totalAcres * state.cumulativeYield;
     

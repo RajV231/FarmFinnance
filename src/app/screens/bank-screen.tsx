@@ -169,7 +169,7 @@ export const BankScreen = () => {
                             <>
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 flex items-start gap-2">
                                     <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                                    <p className="text-xs text-blue-800 font-medium">Earn 6.5% interest over 2 seasons. Safe and reliable growth.</p>
+                                    <p className="text-xs text-blue-800 font-medium">Earn 10% interest over 2 seasons. Safe and reliable growth.</p>
                                 </div>
                                 <div className="flex gap-2">
                                     <input 

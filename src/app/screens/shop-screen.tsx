@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../context/game-context';
 import { useLanguage } from '../context/language-context';
 import { ASSETS } from '../data/game-scenarios';
-import { ArrowLeft, Check, ShoppingBag, Map, MapPin } from 'lucide-react';
+import { ArrowLeft, Check, ShoppingBag, Map, MapPin, Wrench } from 'lucide-react';
 
 export const ShopScreen = () => {
   const { state, dispatch } = useGame();
@@ -13,12 +13,11 @@ export const ShopScreen = () => {
   const downPayment = LAND_PRICE_PER_ACRE * LAND_DOWN_PAYMENT_PCT;
   const loanAmount = LAND_PRICE_PER_ACRE - downPayment;
 
-// STRICT BANK RULE: You cannot buy more land if you have ANY outstanding debt.
-  const hasExistingDebt = state.debt > 0 || state.landLoan.principal > 0; 
-  const canAffordUpfront = state.savings >= 40000;
+  // STRICT BANK RULE BUG FIX RESTORED: You cannot buy more land if you have ANY outstanding debt.
+  const hasExistingDebt = state.debt > 0 || (state.landLoan && state.landLoan.principal > 0);
+  const canAffordUpfront = state.savings >= downPayment;
   const canBuyLand = canAffordUpfront && !hasExistingDebt;
 
-  // State for our custom confirmation modal
   const [showLandModal, setShowLandModal] = useState(false);
 
   const handleBuyLandConfirm = () => {
@@ -38,7 +37,7 @@ export const ShopScreen = () => {
                   className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl hover:bg-white/30 transition-all active:scale-95"
                 >
                   <ArrowLeft className="w-5 h-5" />
-                  <span className="font-semibold">Back</span>
+                  <span className="font-semibold">{t('ui_back')}</span>
                 </button>
             </div>
 
@@ -48,12 +47,12 @@ export const ShopScreen = () => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold">{t('shop')}</h2>
-                  <p className="text-sm text-teal-100 font-medium">Invest in your farm's future</p>
+                  <p className="text-sm text-teal-100 font-medium">{t('shop_subtitle')}</p>
                 </div>
             </div>
 
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
-                <div className="text-xs font-semibold text-teal-100 uppercase tracking-wider mb-1">Available Savings</div>
+                <div className="text-xs font-semibold text-teal-100 uppercase tracking-wider mb-1">{t('shop_avail_sav')}</div>
                 <div className="text-3xl font-bold font-mono">₹{state.savings.toLocaleString()}</div>
             </div>
           </div>
@@ -70,39 +69,44 @@ export const ShopScreen = () => {
                             <Map className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-lg">Expand Farm</h3>
-                            <p className="text-xs text-amber-100 font-medium">+1 Acre of Land</p>
+                            <h3 className="font-bold text-lg">{t('shop_expand')}</h3>
+                            <p className="text-xs text-amber-100 font-medium">{t('shop_acre_plus')}</p>
                         </div>
                     </div>
                 </div>
                 <div className="p-5">
                     <div className="flex justify-between items-center mb-4">
                         <div>
-                            <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Total Cost</div>
+                            <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">{t('shop_total_cost')}</div>
                             <div className="text-xl font-bold text-gray-900 font-mono">₹{LAND_PRICE_PER_ACRE.toLocaleString()}</div>
                         </div>
                         <div className="text-right">
-                            <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Down Payment (20%)</div>
+                            <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">{t('shop_down_pay')}</div>
                             <div className="text-xl font-bold text-orange-600 font-mono">₹{downPayment.toLocaleString()}</div>
                         </div>
                     </div>
+                    {hasExistingDebt && (
+                        <div className="text-xs text-red-600 bg-red-50 p-3 rounded-lg mb-3 font-bold border border-red-100">
+                            {t('plan_debt_notice', { val: (state.debt + (state.landLoan?.principal || 0)).toLocaleString() })}
+                        </div>
+                    )}
                     <button 
-                        disabled={state.savings < downPayment}
+                        disabled={!canBuyLand}
                         onClick={() => setShowLandModal(true)}
                         className={`w-full py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
-                            state.savings >= downPayment 
+                            canBuyLand 
                                 ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg hover:from-orange-600 hover:to-amber-600 active:scale-95' 
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
                     >
                         <MapPin className="w-5 h-5" />
-                        {state.savings >= downPayment ? 'Buy Land (Financed)' : `Need ₹${(downPayment - state.savings).toLocaleString()} more`}
+                        {canAffordUpfront ? t('shop_buy_financed') : t('goals_need_more', { val: (downPayment - state.savings).toLocaleString() })}
                     </button>
                 </div>
             </div>
 
             {/* ASSETS SECTION */}
-            <h3 className="font-bold text-gray-800 uppercase text-sm tracking-wider px-1 pt-2">Equipment & Assets</h3>
+            <h3 className="font-bold text-gray-800 uppercase text-sm tracking-wider px-1 pt-2">{t('shop_equip_assets')}</h3>
             
             {ASSETS.map(asset => {
                 const isOwned = state.ownedAssets.includes(asset.id);
@@ -111,11 +115,11 @@ export const ShopScreen = () => {
                 let subsidizedBy = "";
 
                 if (state.activeSchemes.includes('pm_kusum') && asset.id === 'solar_pump') {
-                    displayCost *= 0.5; subsidizedBy = "PM-KUSUM (50% Off)";
+                    displayCost *= 0.5; subsidizedBy = t('shop_kusum_off');
                 } else if (state.activeSchemes.includes('per_drop') && asset.id === 'drip_irrigation') {
-                    displayCost *= 0.5; subsidizedBy = "Per Drop (50% Off)";
+                    displayCost *= 0.5; subsidizedBy = t('shop_drop_off');
                 } else if (state.activeSchemes.includes('smam') && asset.id === 'mini_tractor') {
-                    displayCost *= 0.5; subsidizedBy = "SMAM (50% Off)";
+                    displayCost *= 0.5; subsidizedBy = t('shop_smam_off');
                 }
 
                 const canAfford = state.savings >= displayCost;
@@ -138,7 +142,15 @@ export const ShopScreen = () => {
                             )}
                         </div>
                         
-                        <p className="text-sm text-gray-600 mb-4">{t(asset.descKey)}</p>
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-600 mb-2">{t(asset.descKey)}</p>
+                            {asset.maintenanceCost > 0 && (
+                                <div className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 px-2.5 py-1 rounded-lg border border-orange-200 text-xs font-bold">
+                                    <Wrench className="w-3.5 h-3.5" />
+                                    {t('ui_maintenance')}: ₹{asset.maintenanceCost.toLocaleString()} / {t('season')}
+                                </div>
+                            )}
+                        </div>
                         
                         <div className="flex justify-between items-end">
                             <div>
@@ -153,7 +165,7 @@ export const ShopScreen = () => {
                             </div>
                             
                             {isOwned ? (
-                                <span className="text-sm font-bold text-green-700 px-4 py-2 bg-green-100/50 rounded-xl">OWNED</span>
+                                <span className="text-sm font-bold text-green-700 px-4 py-2 bg-green-100/50 rounded-xl">{t('ui_owned')}</span>
                             ) : (
                                 <button
                                     disabled={!canAfford}
@@ -164,7 +176,7 @@ export const ShopScreen = () => {
                                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                     }`}
                                 >
-                                    Buy
+                                    {t('ui_buy')}
                                 </button>
                             )}
                         </div>
@@ -180,22 +192,22 @@ export const ShopScreen = () => {
                     <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Map className="w-8 h-8" />
                     </div>
-                    <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Purchase 1 Acre?</h3>
+                    <h3 className="text-xl font-bold text-center text-gray-900 mb-2">{t('shop_buy_1acre')}</h3>
                     <p className="text-center text-gray-600 mb-6 text-sm">
-                        You will pay <span className="font-bold text-gray-900">₹{downPayment.toLocaleString()}</span> upfront. The remaining <span className="font-bold text-gray-900">₹{loanAmount.toLocaleString()}</span> will be added to your land loan.
+                        {t('shop_acre_desc', { down: downPayment.toLocaleString(), loan: loanAmount.toLocaleString() })}
                     </p>
                     <div className="flex gap-3">
                         <button 
                             onClick={() => setShowLandModal(false)}
                             className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all"
                         >
-                            Cancel
+                            {t('ui_cancel')}
                         </button>
                         <button 
                             onClick={handleBuyLandConfirm}
                             className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-95 transition-all shadow-lg"
                         >
-                            Confirm
+                            {t('ui_confirm')}
                         </button>
                     </div>
                 </div>

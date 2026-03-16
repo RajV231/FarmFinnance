@@ -42,13 +42,13 @@ export interface FinancialGoal {
   descKey: string; // CHANGED
 }
 
-// --- REBALANCED CROPS ---
+// --- REBALANCED CROPS (20% Reduction) ---
 export const CROPS: Crop[] = [
-  { id: 'cotton', nameKey: 'crop_cotton', typeKey: 'type_crop', costPerAcre: 15000, minYield: 12, maxYield: 16, pricePerUnit: 6200, riskFactor: 0.6, waterReq: 'HIGH' },
-  { id: 'soybean', nameKey: 'crop_soybean', typeKey: 'type_crop', costPerAcre: 10000, minYield: 10, maxYield: 15, pricePerUnit: 4200, riskFactor: 0.3, waterReq: 'MED' },
-  { id: 'wheat', nameKey: 'crop_wheat', typeKey: 'type_crop', costPerAcre: 8000, minYield: 18, maxYield: 25, pricePerUnit: 2400, riskFactor: 0.2, waterReq: 'LOW' },
-  { id: 'onion', nameKey: 'crop_onion', typeKey: 'type_veg', costPerAcre: 25000, minYield: 100, maxYield: 150, pricePerUnit: 1400, riskFactor: 0.9, waterReq: 'MED' },
-  { id: 'tomato', nameKey: 'crop_tomato', typeKey: 'type_veg', costPerAcre: 30000, minYield: 200, maxYield: 300, pricePerUnit: 600, riskFactor: 0.8, waterReq: 'HIGH' }
+  { id: 'cotton', nameKey: 'crop_cotton', typeKey: 'type_crop', costPerAcre: 12000, minYield: 12, maxYield: 16, pricePerUnit: 5000, riskFactor: 0.6, waterReq: 'HIGH' },
+  { id: 'soybean', nameKey: 'crop_soybean', typeKey: 'type_crop', costPerAcre: 8000, minYield: 10, maxYield: 15, pricePerUnit: 3400, riskFactor: 0.3, waterReq: 'MED' },
+  { id: 'wheat', nameKey: 'crop_wheat', typeKey: 'type_crop', costPerAcre: 6400, minYield: 18, maxYield: 25, pricePerUnit: 1900, riskFactor: 0.2, waterReq: 'LOW' },
+  { id: 'onion', nameKey: 'crop_onion', typeKey: 'type_veg', costPerAcre: 20000, minYield: 100, maxYield: 150, pricePerUnit: 1100, riskFactor: 0.9, waterReq: 'MED' },
+  { id: 'tomato', nameKey: 'crop_tomato', typeKey: 'type_veg', costPerAcre: 24000, minYield: 200, maxYield: 300, pricePerUnit: 480, riskFactor: 0.8, waterReq: 'HIGH' }
 ];
 
 export const ASSETS: Asset[] = [
