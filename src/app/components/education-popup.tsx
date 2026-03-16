@@ -33,10 +33,9 @@ export const EducationPopup = () => {
     const isCorrect = selected === quiz.correctIndex;
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 pb-8 animate-fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[85vh] overflow-y-auto flex flex-col animate-scale-in">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white relative">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 pb-10 animate-fade-in">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden animate-scale-in">
+                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white relative shrink-0">
                     <button 
                         onClick={handleClose}
                         className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all"
@@ -57,11 +56,9 @@ export const EducationPopup = () => {
                     </div>
                 </div>
                 
-                <div className="p-6">
-                    {/* Question */}
+                <div className="p-6 overflow-y-auto flex-1">
                     <p className="text-lg font-bold text-gray-800 mb-6 leading-relaxed">{t(quiz.questionKey)}</p>
                     
-                    {/* Options */}
                     <div className="space-y-3 mb-6">
                         {quiz.optionsKeys.map((optKey, idx) => {
                             let btnClass = "border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700";
@@ -96,7 +93,6 @@ export const EducationPopup = () => {
                         })}
                     </div>
 
-                    {/* Result */}
                     {showResult && (
                         <div className={`rounded-2xl p-5 mb-6 ${
                             isCorrect 
@@ -121,11 +117,10 @@ export const EducationPopup = () => {
                         </div>
                     )}
 
-                    {/* Continue Button */}
                     {showResult && (
                         <button 
                             onClick={handleClose} 
-                            className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-2xl font-bold hover:from-purple-700 hover:to-indigo-700 active:scale-95 transition-all shadow-lg"
+                            className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-2xl font-bold hover:from-purple-700 hover:to-indigo-700 active:scale-95 transition-all shadow-lg mt-2"
                         >
                             Continue
                         </button>

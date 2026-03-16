@@ -25,10 +25,33 @@ const ScreenRouter = () => {
 
   if (state.phase === 'SPLASH') {
     return (
-        <div className="h-full flex flex-col items-center justify-center bg-game-bg animate-fade-in min-h-screen">
-            <div className="text-8xl mb-6">🌱</div>
-            <h1 className="text-4xl md:text-6xl font-bold text-game-primary mb-4">{t('app_title')}</h1>
-            <p className="text-gray-500 text-xl">{t('splash_subtitle')}</p>
+        <div className="h-full flex flex-col items-center justify-center bg-white animate-fade-in min-h-screen font-sans relative">
+            <div className="flex flex-col items-center justify-center text-center animate-scale-in z-10">
+                {/* Using the actual image file! */}
+                <img 
+                    src="/logo.png" 
+                    alt="KrishiNiti Logo" 
+                    className="w-32 h-32 object-contain mb-6 drop-shadow-md"
+                    onError={(e) => {
+                        // Fallback just in case the image is missing
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement?.insertAdjacentHTML('afterbegin', '<div style="font-size: 6rem; margin-bottom: 1.5rem; display: block;">🌱</div>');
+                    }}
+                />
+                
+                {/* Strict fonts prevent Android from using cursive fallbacks */}
+                <h1 className="text-4xl md:text-6xl font-extrabold text-green-600 tracking-tight mb-4">
+                    {t('app_title')}
+                </h1>
+                <p className="text-xl text-slate-500 font-medium tracking-wide">
+                    {t('splash_subtitle')}
+                </p>
+            </div>
+
+            {/* A subtle loading spinner at the bottom */}
+            <div className="absolute bottom-12 flex flex-col items-center z-10">
+                <div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+            </div>
         </div>
     );
   }
