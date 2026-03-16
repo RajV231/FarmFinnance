@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 dist
 dist-ssr
@@ -22,3 +23,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# --- KrishiNiti Android/Capacitor Additions ---
+
+# Ignore Android build artifacts and temp files
+android/.gradle/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+android/captures
+android/.externalNativeBuild
+android/.cxx
+
+# Ignore capacitor-specific temp files
+capacitor.config.json.timestamp-*

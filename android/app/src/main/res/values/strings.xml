@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">KrishiNiti</string>
+    <string name="title_activity_main">KrishiNiti</string>
+    <string name="package_name">com.rajvrdn.KrishiNiti</string>
+    <string name="custom_url_scheme">com.rajvrdn.KrishiNiti</string>
+</resources>
