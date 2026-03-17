@@ -113,29 +113,30 @@ export const ReportsScreen = () => {
               state.transactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between animate-fade-in"
+                  className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between gap-3 animate-fade-in"
                 >
-                  <div className="flex items-center gap-4">
+                  {/* LEFT SIDE: Icon and Text. min-w-0 and flex-1 allows titles to truncate if space runs out */}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div
                       className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${tx.type === "INCOME" ? "bg-emerald-50" : "bg-red-50"}`}
                     >
                       {getCategoryIcon(tx.category)}
                     </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 leading-tight mb-1">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-bold text-gray-900 leading-tight mb-1 truncate">
                         {t(tx.descKey)}
                       </h4>
-                      <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        {t("season")} {tx.season} •{" "}
-                        {t(`tx_cat_${tx.category.toLowerCase()}`)}
+                      <div className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">
+                        {t("season")} {tx.season} • {t(`tx_cat_${tx.category.toLowerCase()}`)}
                       </div>
                     </div>
                   </div>
+                  
+                  {/* RIGHT SIDE: Amount. shrink-0 guarantees it never gets squished, text-right aligns it safely */}
                   <div
-                    className={`font-bold font-mono text-lg ${tx.type === "INCOME" ? "text-emerald-600" : "text-red-600"}`}
+                    className={`font-bold font-mono text-lg shrink-0 text-right ${tx.type === "INCOME" ? "text-emerald-600" : "text-red-600"}`}
                   >
-                    {tx.type === "INCOME" ? "+" : "-"}₹
-                    {tx.amount.toLocaleString('en-IN')}
+                    {tx.type === "INCOME" ? "+" : "-"}₹{tx.amount.toLocaleString('en-IN')}
                   </div>
                 </div>
               ))

@@ -40,20 +40,21 @@ export const DashboardScreen = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 flex flex-col min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <Coins className="w-4 h-4 text-green-200" />
-                  <span className="text-xs font-semibold text-green-100 uppercase tracking-wider">{t('header_savings')}</span>
+                  <Coins className="w-4 h-4 text-green-200 shrink-0" />
+                  <span className="text-xs font-semibold text-green-100 uppercase tracking-wider truncate">{t('header_savings')}</span>
                 </div>
-                <div className="text-2xl font-bold font-mono text-white">₹{state.savings.toLocaleString('en-IN')}</div>
+                {/* Scaled text slightly, added tracking-tighter and break-words for huge numbers */}
+                <div className="text-xl sm:text-2xl font-bold font-mono text-white tracking-tighter break-words">₹{state.savings.toLocaleString('en-IN')}</div>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 flex flex-col min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp className="w-4 h-4 text-green-200" />
-                  <span className="text-xs font-semibold text-green-100 uppercase tracking-wider">{t('header_wellbeing')}</span>
+                  <TrendingUp className="w-4 h-4 text-green-200 shrink-0" />
+                  <span className="text-xs font-semibold text-green-100 uppercase tracking-wider truncate">{t('header_wellbeing')}</span>
                 </div>
-                <div className="text-2xl font-bold font-mono text-white">{state.wellbeing}%</div>
+                <div className="text-xl sm:text-2xl font-bold font-mono text-white tracking-tighter break-words">{state.wellbeing}%</div>
               </div>
             </div>
           </div>
@@ -87,35 +88,38 @@ export const DashboardScreen = () => {
                   <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">{t('dashboard_fin_health')}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-2xl border border-green-100 shadow-sm">
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-5 rounded-2xl border border-green-100 shadow-sm flex flex-col min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 bg-green-600 rounded-xl flex items-center justify-center"><Coins className="w-4 h-4 text-white" /></div>
-                          <div className="text-xs text-green-700 font-semibold uppercase tracking-wide">{t('header_savings')}</div>
+                          <div className="w-8 h-8 bg-green-600 rounded-xl flex items-center justify-center shrink-0"><Coins className="w-4 h-4 text-white" /></div>
+                          <div className="text-xs text-green-700 font-semibold uppercase tracking-wide truncate">{t('header_savings')}</div>
                         </div>
-                        <div className="text-2xl font-bold text-green-900 font-mono">₹{state.savings.toLocaleString('en-IN')}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-green-900 font-mono tracking-tighter break-words">₹{state.savings.toLocaleString('en-IN')}</div>
                     </div>
-                    <div className={`bg-gradient-to-br ${state.debt > 0 ? 'from-red-50 to-pink-50' : 'from-green-50 to-emerald-50'} p-5 rounded-2xl border ${state.debt > 0 ? 'border-red-100' : 'border-green-100'} shadow-sm`}>
+                    
+                    <div className={`bg-gradient-to-br ${state.debt > 0 ? 'from-red-50 to-pink-50' : 'from-green-50 to-emerald-50'} p-4 sm:p-5 rounded-2xl border ${state.debt > 0 ? 'border-red-100' : 'border-green-100'} shadow-sm flex flex-col min-w-0`}>
                         <div className="flex items-center gap-2 mb-2">
-                          <div className={`w-8 h-8 ${state.debt > 0 ? 'bg-red-600' : 'bg-green-600'} rounded-xl flex items-center justify-center`}><TrendingUp className="w-4 h-4 text-white" /></div>
-                          <div className={`text-xs font-semibold uppercase tracking-wide ${state.debt > 0 ? 'text-red-700' : 'text-green-700'}`}>{t('header_debt')}</div>
+                          <div className={`w-8 h-8 ${state.debt > 0 ? 'bg-red-600' : 'bg-green-600'} rounded-xl flex items-center justify-center shrink-0`}><TrendingUp className="w-4 h-4 text-white" /></div>
+                          <div className={`text-xs font-semibold uppercase tracking-wide truncate ${state.debt > 0 ? 'text-red-700' : 'text-green-700'}`}>{t('header_debt')}</div>
                         </div>
-                        <div className={`text-2xl font-bold font-mono ${state.debt > 0 ? 'text-red-900' : 'text-green-900'}`}>
+                        <div className={`text-xl sm:text-2xl font-bold font-mono tracking-tighter break-words ${state.debt > 0 ? 'text-red-900' : 'text-green-900'}`}>
                             {state.debt > 0 ? `₹${state.debt.toLocaleString('en-IN')}` : t('dashboard_debt_free')}
                         </div>
                     </div>
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 shadow-sm">
+                    
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-5 rounded-2xl border border-blue-100 shadow-sm flex flex-col min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center"><Shield className="w-4 h-4 text-white" /></div>
-                          <div className="text-xs text-blue-700 font-semibold uppercase tracking-wide">{t('dashboard_govt_benefits')}</div>
+                          <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shrink-0"><Shield className="w-4 h-4 text-white" /></div>
+                          <div className="text-xs text-blue-700 font-semibold uppercase tracking-wide truncate">{t('dashboard_govt_benefits')}</div>
                         </div>
-                        <div className="text-2xl font-bold text-blue-900 font-mono">₹{dbtReceived.toLocaleString('en-IN')}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-blue-900 font-mono tracking-tighter break-words">₹{dbtReceived.toLocaleString('en-IN')}</div>
                     </div>
-                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-5 rounded-2xl border border-purple-100 shadow-sm">
+                    
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 sm:p-5 rounded-2xl border border-purple-100 shadow-sm flex flex-col min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 bg-purple-600 rounded-xl flex items-center justify-center"><Home className="w-4 h-4 text-white" /></div>
-                          <div className="text-xs text-purple-700 font-semibold uppercase tracking-wide">{t('header_wellbeing')}</div>
+                          <div className="w-8 h-8 bg-purple-600 rounded-xl flex items-center justify-center shrink-0"><Home className="w-4 h-4 text-white" /></div>
+                          <div className="text-xs text-purple-700 font-semibold uppercase tracking-wide truncate">{t('header_wellbeing')}</div>
                         </div>
-                        <div className="text-2xl font-bold text-purple-900 font-mono">{state.wellbeing}%</div>
+                        <div className="text-xl sm:text-2xl font-bold text-purple-900 font-mono tracking-tighter break-words">{state.wellbeing}%</div>
                     </div>
                 </div>
             </div>
