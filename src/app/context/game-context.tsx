@@ -607,16 +607,22 @@ const GameContext = createContext<{ state: GameState; dispatch: React.Dispatch<A
 export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
 
+  // FIX: Watch the state.phase so the timer runs again if the game is reset
   useEffect(() => {
-    setTimeout(() => {
-        const saved = loadGame<GameState>();
-        if (saved && saved.phase !== "SPLASH") {
-            dispatch({ type: "LOAD_GAME", payload: saved });
-        } else {
-            dispatch({ type: "SET_LANGUAGE_PHASE" });
-        }
-    }, 2500);
-  }, []);
+    if (state.phase === 'SPLASH') {
+        const timer = setTimeout(() => {
+            const saved = loadGame<GameState>();
+            if (saved && saved.phase !== "SPLASH") {
+                dispatch({ type: "LOAD_GAME", payload: saved });
+            } else {
+                dispatch({ type: "SET_LANGUAGE_PHASE" });
+            }
+        }, 2500);
+        
+        // Clean up the timer to prevent memory leaks
+        return () => clearTimeout(timer);
+    }
+  }, [state.phase]); // Adding state.phase as a dependency is the magic fix!
 
   useEffect(() => { if (state.phase !== "SPLASH") saveGame(state); }, [state]);
 
