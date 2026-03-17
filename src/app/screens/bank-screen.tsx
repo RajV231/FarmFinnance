@@ -80,7 +80,7 @@ export const BankScreen = () => {
                                 />
                                 <button 
                                     onClick={() => {
-                                        dispatch({ type: 'REPAY_LOAN', payload: { amount: cropRepay, type: cropRepay >= state.debt ? 'FULL' : 'PARTIAL' } });
+                                        dispatch({ type: 'BANK_TRANSACTION', payload: { type: 'PAY_CROP_DEBT', amount: cropRepay } });
                                         setCropRepay(0);
                                     }}
                                     disabled={cropRepay > state.savings || cropRepay <= 0}

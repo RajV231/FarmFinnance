@@ -157,7 +157,7 @@ type Action =
   | { type: "BUY_LAND"; payload: { acres: number; cost: number; downPayment: number } } 
   | { type: "SET_GOAL"; payload: FinancialGoal }
   | { type: "ACHIEVE_GOAL"; payload: { goal: FinancialGoal; isMain: boolean } }
-  | { type: "BANK_TRANSACTION"; payload: { type: "DEPOSIT_FD" | "BUY_GOLD" | "SELL_GOLD" | "PAY_LAND_PRINCIPAL"; amount: number; grams?: number; } }
+  | { type: "BANK_TRANSACTION"; payload: { type: "DEPOSIT_FD" | "BUY_GOLD" | "SELL_GOLD" | "PAY_LAND_PRINCIPAL" | "PAY_CROP_DEBT"; amount: number; grams?: number; } }
   | { type: "COMMIT_PLAN"; payload: { crop: Crop; loan: Loan; loanAmount: number; insurance: Insurance; savingsAllocated: number; } }
   | { type: "TRIGGER_EVENT" }
   | { type: "RESOLVE_EVENT_CHOICE"; payload: { cost: number; wellbeing: number; } }
@@ -333,6 +333,21 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     case "BANK_TRANSACTION": {
       const { type, amount, grams } = action.payload;
       const newTxs = [...state.transactions];
+
+      // NEW: Handle Crop/Event Debt Repayment from the Bank safely
+      if (type === "PAY_CROP_DEBT") {
+          const actualPayment = Math.min(amount, state.debt); 
+          if(state.savings < actualPayment || actualPayment <= 0) return state;
+          
+          newTxs.unshift({ id: Date.now().toString()+'cd', season: state.seasonNumber, amount: actualPayment, type: 'EXPENSE', category: 'BANK', descKey: 'tx_crop_repay' });
+          
+          return { 
+              ...state, 
+              savings: state.savings - actualPayment, 
+              debt: Math.max(0, state.debt - actualPayment), 
+              transactions: newTxs 
+          };
+      }
 
       if (type === "DEPOSIT_FD") {
         if (state.savings < amount) return state;
