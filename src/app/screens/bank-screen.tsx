@@ -26,7 +26,7 @@ export const BankScreen = () => {
                       className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl hover:bg-white/30 transition-all active:scale-95"
                     >
                       <ArrowLeft className="w-5 h-5" />
-                      <span className="font-semibold">Back</span>
+                      <span className="font-semibold">{t('ui_back')}</span>
                     </button>
                 </div>
 
@@ -74,7 +74,7 @@ export const BankScreen = () => {
                                     type="number" min="0" 
                                     onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                     placeholder="Repay Amount" 
-                                    className="flex-1 border-2 border-gray-200 p-3 rounded-xl focus:border-red-500 focus:outline-none font-mono" 
+                                    className="flex-1 min-w-0 border-2 border-gray-200 p-3 rounded-xl focus:border-red-500 focus:outline-none font-mono" 
                                     onChange={(e) => setCropRepay(Math.max(0, parseInt(e.target.value) || 0))} 
                                     value={cropRepay || ''}
                                 />
@@ -84,12 +84,13 @@ export const BankScreen = () => {
                                         setCropRepay(0);
                                     }}
                                     disabled={cropRepay > state.savings || cropRepay <= 0}
-                                    className="bg-gradient-to-r from-red-600 to-rose-600 text-white px-6 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:from-red-700 hover:to-rose-700 active:scale-95 transition-all"
+                                    className="shrink-0 bg-gradient-to-r from-red-600 to-rose-600 text-white px-4 sm:px-6 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:from-red-700 hover:to-rose-700 active:scale-95 transition-all"
                                 >Pay Debt</button>
                             </div>
                         </div>
                     </div>
                 )}
+
                 {/* LAND LOAN STATUS */}
                 {state.landLoan.principal > 0 && (
                     <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
@@ -117,18 +118,18 @@ export const BankScreen = () => {
                             </div>
                             <div className="flex gap-2">
                                 <input 
-  type="number" 
-  min="0"
-  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-  placeholder={t('bank_repay_prin')} 
-  className="flex-1 border-2 border-gray-200 p-3 rounded-xl focus:border-blue-500 focus:outline-none font-mono" 
-  onChange={(e) => setLoanRepay(Math.max(0, parseInt(e.target.value) || 0))} 
-  value={loanRepay || ''}
-/>
+                                    type="number" 
+                                    min="0"
+                                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                    placeholder={t('bank_repay_prin')} 
+                                    className="flex-1 min-w-0 border-2 border-gray-200 p-3 rounded-xl focus:border-blue-500 focus:outline-none font-mono" 
+                                    onChange={(e) => setLoanRepay(Math.max(0, parseInt(e.target.value) || 0))} 
+                                    value={loanRepay || ''}
+                                />
                                 <button 
                                     onClick={() => dispatch({ type: 'BANK_TRANSACTION', payload: { type: 'PAY_LAND_PRINCIPAL', amount: loanRepay } })}
                                     disabled={loanRepay > state.savings || loanRepay <= 0}
-                                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-700 hover:to-indigo-700 active:scale-95 transition-all"
+                                    className="shrink-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-700 hover:to-indigo-700 active:scale-95 transition-all"
                                 >{t('bank_pay_btn')}</button>
                             </div>
                         </div>
@@ -169,22 +170,22 @@ export const BankScreen = () => {
                             <>
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 flex items-start gap-2">
                                     <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                                    <p className="text-xs text-blue-800 font-medium">Earn 10% interest over 2 seasons. Safe and reliable growth.</p>
+                                    <p className="text-xs text-blue-800 font-medium">Earn 6.5% interest over 2 seasons. Safe and reliable growth.</p>
                                 </div>
                                 <div className="flex gap-2">
                                     <input 
-  type="number" 
-  min="0"
-  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-  placeholder="₹ Amount" 
-  className="flex-1 border-2 border-gray-200 p-3 rounded-xl focus:border-green-500 focus:outline-none font-mono" 
-  onChange={(e) => setFdAmount(Math.max(0, parseInt(e.target.value) || 0))} 
-  value={fdAmount || ''}
-/>
+                                        type="number" 
+                                        min="0"
+                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                        placeholder="₹ Amount" 
+                                        className="flex-1 min-w-0 border-2 border-gray-200 p-3 rounded-xl focus:border-green-500 focus:outline-none font-mono" 
+                                        onChange={(e) => setFdAmount(Math.max(0, parseInt(e.target.value) || 0))} 
+                                        value={fdAmount || ''}
+                                    />
                                     <button 
                                         onClick={() => dispatch({ type: 'BANK_TRANSACTION', payload: { type: 'DEPOSIT_FD', amount: fdAmount } })}
                                         disabled={fdAmount > state.savings || fdAmount <= 0}
-                                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:from-green-700 hover:to-emerald-700 active:scale-95 transition-all"
+                                        className="shrink-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 sm:px-6 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:from-green-700 hover:to-emerald-700 active:scale-95 transition-all"
                                     >{t('bank_invest_btn')}</button>
                                 </div>
                             </>
@@ -224,18 +225,18 @@ export const BankScreen = () => {
                         <div className="space-y-3">
                             <div className="flex gap-2 items-center">
                                 <input 
-  type="number" 
-  min="0"
-  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-  placeholder="Grams" 
-  className="w-24 border-2 border-gray-200 p-3 rounded-xl focus:border-amber-500 focus:outline-none font-mono text-center" 
-  onChange={(e) => setGoldGrams(Math.max(0, parseInt(e.target.value) || 0))} 
-  value={goldGrams || ''}
-/>
-                                <span className="text-sm text-gray-500 font-medium">×</span>
-                                <div className="flex-1 bg-gray-50 p-3 rounded-xl">
-                                    <span className="text-sm text-gray-600 font-medium">Total: </span>
-                                    <span className="text-lg font-bold text-gray-900 font-mono">₹{(goldGrams * goldRate).toLocaleString()}</span>
+                                    type="number" 
+                                    min="0"
+                                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                    placeholder="Grams" 
+                                    className="w-20 sm:w-24 min-w-0 border-2 border-gray-200 p-3 rounded-xl focus:border-amber-500 focus:outline-none font-mono text-center" 
+                                    onChange={(e) => setGoldGrams(Math.max(0, parseInt(e.target.value) || 0))} 
+                                    value={goldGrams || ''}
+                                />
+                                <span className="text-sm text-gray-500 font-medium shrink-0">×</span>
+                                <div className="flex-1 min-w-0 bg-gray-50 p-3 rounded-xl truncate flex items-center justify-between">
+                                    <span className="text-sm text-gray-600 font-medium mr-2">Total:</span>
+                                    <span className="text-lg font-bold text-gray-900 font-mono truncate">₹{(goldGrams * goldRate).toLocaleString()}</span>
                                 </div>
                             </div>
 
@@ -245,14 +246,16 @@ export const BankScreen = () => {
                                     disabled={(goldGrams * goldRate) > state.savings || goldGrams <= 0}
                                     className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-yellow-600 active:scale-95 transition-all flex items-center justify-center gap-2"
                                 >
-                                    <TrendingUp className="w-4 h-4" />
-                                    {t('bank_buy_btn')}
+                                    <TrendingUp className="w-4 h-4 shrink-0" />
+                                    <span className="truncate">{t('bank_buy_btn')}</span>
                                 </button>
                                 <button 
                                     onClick={() => dispatch({ type: 'BANK_TRANSACTION', payload: { type: 'SELL_GOLD', amount: goldGrams * goldRate, grams: goldGrams } })}
                                     disabled={state.bankBalance.goldGrams < goldGrams || goldGrams <= 0}
-                                    className="bg-white border-2 border-amber-500 text-amber-600 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 active:scale-95 transition-all"
-                                >{t('bank_sell_btn')}</button>
+                                    className="bg-white border-2 border-amber-500 text-amber-600 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 active:scale-95 transition-all truncate"
+                                >
+                                    {t('bank_sell_btn')}
+                                </button>
                             </div>
                         </div>
                     </div>

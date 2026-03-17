@@ -2,19 +2,25 @@ import React, { useState } from 'react';
 import { useGame } from '../context/game-context';
 import { useLanguage, Language } from '../context/language-context';
 import { ASSETS } from '../data/game-scenarios';
-import { User, Shield, Award, ArrowLeft, Coins, MapPin, RefreshCw, AlertTriangle, Globe } from 'lucide-react';
+import { User, Shield, Award, ArrowLeft, Coins, MapPin, RefreshCw, AlertTriangle, Globe, Info, Code, Github, Linkedin, Layout } from 'lucide-react';
 import { playSFX } from '../utils/fx-engine';
+import { Browser } from '@capacitor/browser';
 
 export const ProfileScreen = () => {
   const { state, dispatch } = useGame();
   const { t, language, setLanguage } = useLanguage(); 
   const [showRestartModal, setShowRestartModal] = useState(false);
+  const [showCreditsModal, setShowCreditsModal] = useState(false); // NEW STATE
 
   const handleLanguageChange = (langCode: Language) => {
       if (setLanguage) {
           setLanguage(langCode);
           playSFX('success'); 
       }
+  };
+
+  const openExternalLink = async (url: string) => {
+      await Browser.open({ url });
   };
 
   return (
@@ -115,8 +121,19 @@ export const ProfileScreen = () => {
                 )}
             </div>
 
-            <div className="mt-8 pb-4">
-                <button onClick={() => { playSFX('click'); setShowRestartModal(true); }} className="w-full bg-white border-2 border-red-200 text-red-600 py-4 rounded-2xl font-bold shadow-sm hover:bg-red-50 active:scale-95 transition-all flex items-center justify-center gap-2">
+            {/* BUTTONS SECTION */}
+            <div className="mt-8 pb-4 space-y-3">
+                <button 
+                    onClick={() => { playSFX('click'); setShowCreditsModal(true); }} 
+                    className="w-full bg-white border-2 border-gray-200 text-gray-700 py-4 rounded-2xl font-bold shadow-sm hover:bg-gray-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                    <Info className="w-5 h-5 text-blue-500" /> {t('ui_about_dev')}
+                </button>
+                
+                <button 
+                    onClick={() => { playSFX('click'); setShowRestartModal(true); }} 
+                    className="w-full bg-white border-2 border-red-200 text-red-600 py-4 rounded-2xl font-bold shadow-sm hover:bg-red-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
                     <RefreshCw className="w-5 h-5" />{t('ui_restart_game')}
                 </button>
             </div>
@@ -132,6 +149,62 @@ export const ProfileScreen = () => {
                         <button onClick={() => { playSFX('click'); setShowRestartModal(false); }} className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all">{t('ui_cancel')}</button>
                         <button onClick={() => { setShowRestartModal(false); dispatch({ type: 'RESET_GAME' }); }} className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 active:scale-95 transition-all shadow-lg">{t('ui_restart')}</button>
                     </div>
+                </div>
+            </div>
+        )}
+
+        {/* CREDITS / ABOUT MODAL */}
+        {showCreditsModal && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+                <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden animate-scale-in relative">
+                   {/* Subtle Background Glow */}
+                   <div className="absolute -right-6 -top-6 w-32 h-32 bg-green-50 rounded-full blur-3xl"></div>
+
+                   <div className="p-6 relative z-10">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl flex items-center justify-center text-white shadow-md shrink-0">
+                                <Code className="w-8 h-8" />
+                            </div>
+                            <div>
+                                <h4 className="text-xl font-extrabold text-gray-900">{t('dev_title')}</h4>
+                                <p className="text-sm text-gray-500 font-medium">{t('dev_subtitle')}</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                                {t('dev_desc')}
+                            </p>
+                        </div>
+
+                        {/* Link Buttons using Capacitor Browser */}
+                        <div className="flex flex-col gap-3 mb-6">
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={() => openExternalLink('https://github.com/RajV231')} 
+                                    className="flex-1 flex items-center justify-center gap-2 bg-gray-900 text-white py-3 rounded-xl text-sm font-bold hover:bg-gray-800 transition-all active:scale-95"
+                                >
+                                    <Github className="w-4 h-4" /> GitHub
+                                </button>
+                                <button 
+                                    onClick={() => openExternalLink('https://www.linkedin.com/in/rajvardhan-wakharade-259403331/')} 
+                                    className="flex-1 flex items-center justify-center gap-2 bg-[#0A66C2] text-white py-3 rounded-xl text-sm font-bold hover:bg-[#004182] transition-all active:scale-95"
+                                >
+                                    <Linkedin className="w-4 h-4" /> LinkedIn
+                                </button>
+                            </div>
+                            <button 
+                                onClick={() => openExternalLink('https://rajvardhan.gt.tc/?i=1')} 
+                                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white py-3 rounded-xl text-sm font-bold hover:from-teal-600 hover:to-emerald-700 transition-all active:scale-95 shadow-sm"
+                            >
+                                <Layout className="w-4 h-4" /> {t('dev_portfolio')}
+                            </button>
+                        </div>
+
+                        <button onClick={() => { playSFX('click'); setShowCreditsModal(false); }} className="w-full py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all">
+                            {t('ui_close')}
+                        </button>
+                   </div>
                 </div>
             </div>
         )}
