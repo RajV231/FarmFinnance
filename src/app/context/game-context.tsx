@@ -653,11 +653,15 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             }
             break;
         case 'RESOLVE_EVENT_CHOICE':
-            // If the event costs them money or hurts their wellbeing, play a bad sound!
-            if (action.payload.cost > 2000 || action.payload.wellbeing < 0) {
-                playSFX('bad_event');
+            // FIX: Don't punish the player for making a strategic investment!
+            // If they spend money to save the farm, play the 'cash' transaction sound.
+            // Only play the 'bad_event' sound if they take a direct hit to their health/wellbeing.
+            if (action.payload.wellbeing < 0) {
+                playSFX('bad_event'); // e.g., They worked in extreme heat and lost health
+            } else if (action.payload.cost > 0) {
+                playSFX('cash'); // e.g., They bought a tarp or pesticides to save the crop
             } else {
-                playSFX('click');
+                playSFX('click'); // e.g., They chose "Do Nothing" and no upfront cost occurred
             }
             break;
         case 'ANSWER_QUIZ':
@@ -667,6 +671,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             break;
         case 'RESET_GAME':
             playSFX('error');
+            // FIX: Force a native Hard Reload of the WebView 300ms after clearing data.
+            // This guarantees the Splash Screen timer fires perfectly on mobile.
+            setTimeout(() => {
+                window.location.reload();
+            }, 300);
             break;
         case 'NEXT_SEASON':
         case 'TRIGGER_EVENT':

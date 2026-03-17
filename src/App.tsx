@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { App as CapacitorApp } from '@capacitor/app'; // NEW: Capacitor App Plugin
 import { GameProvider, useGame, GamePhase } from './app/context/game-context';
-import { LanguageProvider, useLanguage } from './app/context/language-context'; // IMPORT HOOK
+import { LanguageProvider, useLanguage } from './app/context/language-context'; 
 
 import { LanguageScreen } from './app/screens/language-screen';
 import { FarmSetupScreen } from './app/screens/farm-setup-screen';
@@ -18,10 +19,42 @@ import { BankScreen } from './app/screens/bank-screen';
 import { GoalsScreen } from './app/screens/goals-screen'; 
 import { SchemesScreen } from './app/screens/schemes-screen';
 import { MarketScreen } from './app/screens/market-screen';
+import { playSFX } from './app/utils/fx-engine'; // NEW: For back button sound
 
 const ScreenRouter = () => {
-  const { state } = useGame();
-  const { t } = useLanguage(); // NEW: Hook into dictionary
+  // EXTRACTED DISPATCH: We need dispatch here to trigger the screen change
+  const { state, dispatch } = useGame();
+  const { t } = useLanguage(); 
+
+  // NATIVE ANDROID BACK BUTTON LISTENER
+  useEffect(() => {
+    const handleBackButton = async () => {
+      // 1. Screens where the back button should return to the Dashboard
+      const subScreens: GamePhase[] = [
+        'PROFILE', 'REPORTS', 'SHOP', 'BANK', 
+        'GOALS', 'SCHEMES', 'MARKET'
+      ];
+
+      if (subScreens.includes(state.phase)) {
+        playSFX('click'); 
+        dispatch({ type: 'GO_TO_DASHBOARD' });
+      } 
+      // 2. If they are already on the Dashboard, exit the app
+      else if (state.phase === 'DASHBOARD') {
+        CapacitorApp.exitApp();
+      }
+      // 3. For critical phases (SPLASH, EVENTS, HARVEST), do nothing! 
+      // This protects the game state from breaking if they spam the back button.
+    };
+
+    // Register the listener
+    const backListener = CapacitorApp.addListener('backButton', handleBackButton);
+
+    // Cleanup the listener when component unmounts
+    return () => {
+      backListener.then(listener => listener.remove());
+    };
+  }, [state.phase, dispatch]);
 
   if (state.phase === 'SPLASH') {
     return (
