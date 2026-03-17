@@ -55,7 +55,7 @@ export const GoalSelectionScreen = () => {
                                 <p className="text-sm text-gray-500 leading-relaxed mb-2">{t(goal.descKey)}</p>
                                 <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 rounded-xl border border-green-200">
                                     <span className="text-xs font-semibold text-gray-600">{t('goal_target')}</span>
-                                    <span className="font-mono font-bold text-green-700">₹{goal.targetAmount.toLocaleString()}</span>
+                                    <span className="font-mono font-bold text-green-700">₹{goal.targetAmount.toLocaleString('en-IN')}</span>
                                 </div>
                             </div>
                             <ArrowRight className="w-6 h-6 text-gray-400 flex-shrink-0" />

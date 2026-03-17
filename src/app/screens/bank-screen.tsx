@@ -43,7 +43,7 @@ export const BankScreen = () => {
                 {/* Balance Display */}
                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
                     <div className="text-xs font-semibold text-green-100 uppercase tracking-wider mb-1">{t('bank_avail_bal')}</div>
-                    <div className="text-3xl font-bold font-mono">₹{state.savings.toLocaleString()}</div>
+                    <div className="text-3xl font-bold font-mono">₹{state.savings.toLocaleString('en-IN')}</div>
                 </div>
               </div>
             </div>
@@ -67,7 +67,7 @@ export const BankScreen = () => {
                         <div className="p-5">
                             <div className="bg-gray-50 p-3 rounded-xl mb-4">
                                 <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Total Outstanding</div>
-                                <div className="text-xl font-bold text-red-600 font-mono">₹{state.debt.toLocaleString()}</div>
+                                <div className="text-xl font-bold text-red-600 font-mono">₹{state.debt.toLocaleString('en-IN')}</div>
                             </div>
                             <div className="flex gap-2">
                                 <input 
@@ -109,11 +109,11 @@ export const BankScreen = () => {
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div className="bg-gray-50 p-3 rounded-xl">
                                     <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">{t('bank_principal_left')}</div>
-                                    <div className="text-xl font-bold text-gray-900 font-mono">₹{state.landLoan.principal.toLocaleString()}</div>
+                                    <div className="text-xl font-bold text-gray-900 font-mono">₹{state.landLoan.principal.toLocaleString('en-IN')}</div>
                                 </div>
                                 <div className="bg-red-50 p-3 rounded-xl">
                                     <div className="text-xs text-red-600 font-semibold uppercase tracking-wider mb-1">{t('bank_season_emi')}</div>
-                                    <div className="text-xl font-bold text-red-700 font-mono">₹{state.landLoan.seasonEmi.toLocaleString()}</div>
+                                    <div className="text-xl font-bold text-red-700 font-mono">₹{state.landLoan.seasonEmi.toLocaleString('en-IN')}</div>
                                 </div>
                             </div>
                             <div className="flex gap-2">
@@ -161,7 +161,7 @@ export const BankScreen = () => {
                                     <Lock className="w-5 h-5 text-green-600" />
                                     <span className="text-sm font-bold text-green-700 uppercase tracking-wider">{t('bank_locked')}</span>
                                 </div>
-                                <div className="text-3xl font-bold text-green-900 font-mono mb-1">₹{state.bankBalance.fixedDeposit.toLocaleString()}</div>
+                                <div className="text-3xl font-bold text-green-900 font-mono mb-1">₹{state.bankBalance.fixedDeposit.toLocaleString('en-IN')}</div>
                                 <div className="text-xs text-green-600 font-medium">
                                     {t('bank_matures')} Season {state.bankBalance.fdMaturitySeason}
                                 </div>
@@ -236,7 +236,7 @@ export const BankScreen = () => {
                                 <span className="text-sm text-gray-500 font-medium shrink-0">×</span>
                                 <div className="flex-1 min-w-0 bg-gray-50 p-3 rounded-xl truncate flex items-center justify-between">
                                     <span className="text-sm text-gray-600 font-medium mr-2">Total:</span>
-                                    <span className="text-lg font-bold text-gray-900 font-mono truncate">₹{(goldGrams * goldRate).toLocaleString()}</span>
+                                    <span className="text-lg font-bold text-gray-900 font-mono truncate">₹{(goldGrams * goldRate).toLocaleString('en-IN')}</span>
                                 </div>
                             </div>
 

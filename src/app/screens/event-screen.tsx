@@ -55,7 +55,7 @@ export const EventScreen = () => {
       {/* NEW: FLOATING SAVINGS BADGE */}
       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-gray-200 z-50">
           <span className="text-xs text-gray-500 font-bold uppercase tracking-wider mr-2">Savings:</span>
-          <span className="font-bold text-green-700 font-mono">₹{state.savings.toLocaleString()}</span>
+          <span className="font-bold text-green-700 font-mono">₹{state.savings.toLocaleString('en-IN')}</span>
       </div>
 
       {/* Farm Visualizer */}
@@ -117,7 +117,7 @@ export const EventScreen = () => {
                   <span className="font-bold text-left flex-1">{t(evt.choiceA.labelKey)}</span>
                   <div className="flex items-center gap-2">
                     <span className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-sm font-bold">
-                        -₹{evt.choiceA.cost.toLocaleString()}
+                        -₹{evt.choiceA.cost.toLocaleString('en-IN')}
                     </span>
                     <ArrowRight className="w-5 h-5" />
                   </div>
@@ -136,7 +136,7 @@ export const EventScreen = () => {
                   <span className="font-bold text-left flex-1">{t(evt.choiceB.labelKey)}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-gray-500">
-                        {evt.choiceB.cost > 0 ? `-₹${evt.choiceB.cost.toLocaleString()}` : t('ui_free')}
+                        {evt.choiceB.cost > 0 ? `-₹${evt.choiceB.cost.toLocaleString('en-IN')}` : t('ui_free')}
                     </span>
                     <ArrowRight className="w-5 h-5 text-gray-400" />
                   </div>

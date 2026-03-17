@@ -42,7 +42,7 @@ export const HarvestScreen = () => {
                                 {t('ui_net_profit')}
                             </span>
                             <span className={`text-4xl font-bold ${isProfit ? 'text-green-700' : 'text-red-600'}`}>
-                                {isProfit ? '+' : ''}₹{stats.netProfit.toLocaleString()}
+                                {isProfit ? '+' : ''}₹{stats.netProfit.toLocaleString('en-IN')}
                             </span>
                         </div>
                         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
@@ -56,7 +56,7 @@ export const HarvestScreen = () => {
                     <div className="space-y-3 pt-4 border-t border-gray-200">
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-600 font-medium">{t('ui_crop_sales')}</span>
-                            <span className="font-bold text-gray-900 font-mono">₹{stats.grossIncome.toLocaleString()}</span>
+                            <span className="font-bold text-gray-900 font-mono">₹{stats.grossIncome.toLocaleString('en-IN')}</span>
                         </div>
                         
                         {stats.insurancePayout > 0 && (
@@ -65,13 +65,13 @@ export const HarvestScreen = () => {
                                     <ShieldCheck className="w-4 h-4"/>
                                     <span className="text-sm font-medium">{t('ui_insurance_payout')}</span>
                                 </div>
-                                <span className="font-bold text-blue-800 font-mono">+ ₹{stats.insurancePayout.toLocaleString()}</span>
+                                <span className="font-bold text-blue-800 font-mono">+ ₹{stats.insurancePayout.toLocaleString('en-IN')}</span>
                             </div>
                         )}
 
                         <div className="flex justify-between items-center text-red-600">
                             <span className="text-sm font-medium">{t('ui_total_expenses')}</span>
-                            <span className="font-bold font-mono">- ₹{stats.totalExpenses.toLocaleString()}</span>
+                            <span className="font-bold font-mono">- ₹{stats.totalExpenses.toLocaleString('en-IN')}</span>
                         </div>
 
                         <div className="flex justify-between items-center pt-2 border-t border-gray-200">
@@ -81,13 +81,13 @@ export const HarvestScreen = () => {
 
                         <div className="flex justify-between items-center text-red-500">
                             <span className="text-sm font-medium">{t('ui_transport_cost')}</span>
-                            <span className="font-bold font-mono">- ₹{state.lastHarvestStats?.transportCost?.toLocaleString()}</span>
+                            <span className="font-bold font-mono">- ₹{state.lastHarvestStats?.transportCost?.toLocaleString('en-IN')}</span>
                         </div>
 
                         {stats.assetMaintenanceCost > 0 && (
                             <div className="flex justify-between items-center text-red-500">
                                 <span className="text-sm font-medium">{t('ui_maintenance')}</span>
-                                <span className="font-bold font-mono">- ₹{stats.assetMaintenanceCost.toLocaleString()}</span>
+                                <span className="font-bold font-mono">- ₹{stats.assetMaintenanceCost.toLocaleString('en-IN')}</span>
                             </div>
                         )}
                     </div>
@@ -96,26 +96,37 @@ export const HarvestScreen = () => {
 
             {/* Financial Summary Cards */}
             <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-green-600 to-emerald-600 text-white p-5 rounded-2xl shadow-lg">
-                    <div className="text-xs opacity-90 font-semibold uppercase tracking-wider mb-1">{t('ui_new_savings')}</div>
-                    <div className="text-2xl font-bold font-mono">₹{state.savings.toLocaleString()}</div>
-                </div>
-                <div className={`p-5 rounded-2xl shadow-lg ${
-                  state.debt > 0 
-                    ? 'bg-gradient-to-br from-red-600 to-pink-600 text-white' 
-                    : 'bg-gradient-to-br from-green-600 to-emerald-600 text-white'
-                }`}>
-                    <div className="text-xs opacity-90 font-semibold uppercase tracking-wider mb-1">{t('ui_current_debt')}</div>
-                    <div className="text-2xl font-bold font-mono">₹{state.debt.toLocaleString()}</div>
-                </div>
-            </div>
+    {/* NEW SAVINGS BLOCK */}
+    {/* Added min-w-0 to prevent grid blowout */}
+    <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-3xl text-white shadow-lg min-w-0">
+        <div className="text-xs font-bold uppercase tracking-wider mb-1 opacity-90 truncate">
+            {t('new_savings') || 'New Savings'}
+        </div>
+        {/* Added truncate and responsive text sizing */}
+        <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono truncate" title={`₹${state.savings.toLocaleString('en-IN')}`}>
+            ₹{state.savings.toLocaleString('en-IN')}
+        </div>
+    </div>
+
+    {/* CURRENT DEBT BLOCK */}
+    {/* Added min-w-0 to prevent grid blowout */}
+    <div className="bg-gradient-to-br from-red-500 to-rose-600 p-4 rounded-3xl text-white shadow-lg min-w-0">
+        <div className="text-xs font-bold uppercase tracking-wider mb-1 opacity-90 truncate">
+            {t('current_debt') || 'Current Debt'}
+        </div>
+        {/* Added truncate and responsive text sizing */}
+        <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono truncate" title={`₹${state.debt.toLocaleString('en-IN')}`}>
+            ₹{state.debt.toLocaleString('en-IN')}
+        </div>
+    </div>
+</div>
 
             {/* Debt Repayment Section */}
             {totalDebt > 0 ? (
                 <div className="bg-gradient-to-br from-red-50 to-pink-50 p-5 rounded-3xl border-2 border-red-200 mb-6">
                     <div className="flex items-center gap-2 mb-3">
                         <AlertTriangle className="w-5 h-5 text-red-600" />
-                        <h3 className="font-bold text-red-800">{t('ui_outstanding_debt')} ₹{totalDebt.toLocaleString()}</h3>
+                        <h3 className="font-bold text-red-800">{t('ui_outstanding_debt')} ₹{totalDebt.toLocaleString('en-IN')}</h3>
                     </div>
                     <p className="text-xs text-red-600 mb-4 font-medium">{t('ui_repay_warning')}</p>
 
@@ -142,7 +153,7 @@ export const HarvestScreen = () => {
             : 'bg-gray-100 border-2 border-gray-200 text-gray-400 cursor-not-allowed'
     }`}
 >
-    <span>{t('ui_pay_interest')} (₹{minPayment.toLocaleString()})</span>
+    <span>{t('ui_pay_interest')} (₹{minPayment.toLocaleString('en-IN')})</span>
     <span className="text-xs opacity-80">{t('ui_score_minus_10')}</span>
 </button>
                         

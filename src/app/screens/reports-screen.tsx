@@ -135,7 +135,7 @@ export const ReportsScreen = () => {
                     className={`font-bold font-mono text-lg ${tx.type === "INCOME" ? "text-emerald-600" : "text-red-600"}`}
                   >
                     {tx.type === "INCOME" ? "+" : "-"}₹
-                    {tx.amount.toLocaleString()}
+                    {tx.amount.toLocaleString('en-IN')}
                   </div>
                 </div>
               ))
@@ -174,7 +174,7 @@ export const ReportsScreen = () => {
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold font-mono">
-                          ₹{record.income.toLocaleString()}
+                          ₹{record.income.toLocaleString('en-IN')}
                         </div>
                       </div>
                     </div>

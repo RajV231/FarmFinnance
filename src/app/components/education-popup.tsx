@@ -50,7 +50,7 @@ export const EducationPopup = () => {
                             <h2 className="font-bold text-xl">{t('app_title')} Quiz</h2>
                             <div className="flex items-center gap-2 mt-1">
                                 <Coins className="w-4 h-4 text-yellow-300" />
-                                <p className="text-purple-200 text-sm font-bold">Earn ₹{quiz.reward.toLocaleString()}!</p>
+                                <p className="text-purple-200 text-sm font-bold">Earn ₹{quiz.reward.toLocaleString('en-IN')}!</p>
                             </div>
                         </div>
                     </div>

@@ -15,7 +15,7 @@ export const SummaryScreen = () => {
         const expandedLand = totalAcres >= 5;
 
         if (debt > 50000) return { 
-            tKey: "per_debt_t", dKey: "per_debt_d", val: debt.toLocaleString(), 
+            tKey: "per_debt_t", dKey: "per_debt_d", val: debt.toLocaleString('en-IN'), 
             icon: <AlertTriangle className="w-12 h-12" />, gradient: 'from-red-600 to-pink-600' 
         };
         if (hasMainGoal && totalWealth > 500000) return { 
@@ -85,7 +85,7 @@ export const SummaryScreen = () => {
                                 <Coins className="w-4 h-4 text-green-600" />
                                 <div className="text-xs text-green-700 font-semibold uppercase tracking-wider">{t('sum_networth')}</div>
                             </div>
-                            <div className="text-2xl font-bold text-green-900 font-mono">₹{finalNetWorth.toLocaleString()}</div>
+                            <div className="text-2xl font-bold text-green-900 font-mono">₹{finalNetWorth.toLocaleString('en-IN')}</div>
                         </div>
 
                         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-2xl border border-blue-200">
@@ -118,7 +118,7 @@ export const SummaryScreen = () => {
                             <div className={`text-2xl font-bold font-mono ${
                                 state.debt > 0 ? 'text-red-900' : 'text-green-900'
                             }`}>
-                                {state.debt > 0 ? `₹${state.debt.toLocaleString()}` : 'Debt Free'}
+                                {state.debt > 0 ? `₹${state.debt.toLocaleString('en-IN')}` : 'Debt Free'}
                             </div>
                         </div>
                     </div>

@@ -58,7 +58,7 @@ export const SeasonPlanningScreen = () => {
   const handleConfirm = () => {
     const available = savingsAlloc + (loanId ? loanAmount : 0);
     if (available < totalUpfrontCost) {
-        setErrorMsg(t('plan_insufficient_funds', { cost: totalUpfrontCost.toLocaleString(), acres: acres.toString() }) || `You need ₹${totalUpfrontCost.toLocaleString()} to proceed.`);
+        setErrorMsg(t('plan_insufficient_funds', { cost: totalUpfrontCost.toLocaleString('en-IN'), acres: acres.toString() }) || `You need ₹${totalUpfrontCost.toLocaleString('en-IN')} to proceed.`);
         playSFX('error'); 
         return;
     }
@@ -98,7 +98,7 @@ export const SeasonPlanningScreen = () => {
                 </div>
                 <div className="bg-green-100 px-4 py-2 rounded-xl shadow-sm">
                     <div className="text-xs text-green-700 font-semibold mb-0.5">Balance</div>
-                    <div className="text-sm font-bold text-green-900 font-mono">₹{state.savings.toLocaleString()}</div>
+                    <div className="text-sm font-bold text-green-900 font-mono">₹{state.savings.toLocaleString('en-IN')}</div>
                 </div>
             </div>
         </div>
@@ -138,7 +138,7 @@ export const SeasonPlanningScreen = () => {
                                 <div className="text-left">
                                     <div className={`font-bold mb-1 ${isSelected ? 'text-green-700' : 'text-gray-800'}`}>{t(c.nameKey)}</div>
                                     <div className={`text-sm font-bold font-mono ${isSelected ? 'text-green-600' : 'text-gray-600'}`}>
-                                        ₹{costForThisCrop.toLocaleString()}
+                                        ₹{costForThisCrop.toLocaleString('en-IN')}
                                     </div>
                                 </div>
                             </button>
@@ -151,7 +151,7 @@ export const SeasonPlanningScreen = () => {
             <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-5">
                 <div className="flex justify-between items-center mb-3">
                     <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wider">{t('Use Savings')}</h3>
-                    <span className="font-bold text-green-700 font-mono">₹{savingsAlloc.toLocaleString()}</span>
+                    <span className="font-bold text-green-700 font-mono">₹{savingsAlloc.toLocaleString('en-IN')}</span>
                 </div>
                 <input 
                     type="range" 
@@ -186,7 +186,7 @@ export const SeasonPlanningScreen = () => {
                 
                 {state.debt > 0 ? (
                     <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm font-bold">
-                        Bank Notice: You have an outstanding farming debt of ₹{state.debt.toLocaleString()}. You cannot take a new crop loan until it is cleared.
+                        Bank Notice: You have an outstanding farming debt of ₹{state.debt.toLocaleString('en-IN')}. You cannot take a new crop loan until it is cleared.
                     </div>
                 ) : (
                     <div className="space-y-3">
@@ -226,7 +226,7 @@ export const SeasonPlanningScreen = () => {
                                         <div className="px-4 pb-4 pt-0">
                                             <div className="flex justify-between text-sm font-bold text-blue-700 mb-2">
                                                 <span>Amount</span>
-                                                <span className="font-mono">₹{loanAmount.toLocaleString()}</span>
+                                                <span className="font-mono">₹{loanAmount.toLocaleString('en-IN')}</span>
                                             </div>
                                             {/* FIX 4: STRICTLY CAPPED LOAN SLIDER */}
                                             <input 
@@ -269,7 +269,7 @@ export const SeasonPlanningScreen = () => {
                         </div>
                         <div>
                             <div className="font-bold text-gray-800">{t('ins_pmfby')}</div>
-                            <div className="text-sm text-gray-500 font-mono">₹{insuranceCost.toLocaleString()}</div>
+                            <div className="text-sm text-gray-500 font-mono">₹{insuranceCost.toLocaleString('en-IN')}</div>
                         </div>
                     </div>
                     <button 
@@ -291,7 +291,7 @@ export const SeasonPlanningScreen = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <div className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-1">{t('Total Upfront Cost')}</div>
-                        <div className="text-2xl font-bold text-gray-900 font-mono">₹{totalUpfrontCost.toLocaleString()}</div>
+                        <div className="text-2xl font-bold text-gray-900 font-mono">₹{totalUpfrontCost.toLocaleString('en-IN')}</div>
                     </div>
                     {(savingsAlloc + (loanId ? loanAmount : 0)) < totalUpfrontCost && ( <AlertCircle className="w-8 h-8 text-red-600" /> )}
                 </div>

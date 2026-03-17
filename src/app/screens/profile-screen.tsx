@@ -76,7 +76,7 @@ export const ProfileScreen = () => {
                             <Coins className="w-5 h-5" />
                             <span className="text-xs font-bold uppercase tracking-wider">{t('header_savings')}</span>
                         </div>
-                        <div className="text-2xl font-bold font-mono">₹{state.savings.toLocaleString()}</div>
+                        <div className="text-2xl font-bold font-mono">₹{state.savings.toLocaleString('en-IN')}</div>
                     </div>
                 </div>
                 <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
@@ -85,7 +85,7 @@ export const ProfileScreen = () => {
                             <Coins className="w-5 h-5" />
                             <span className="text-xs font-bold uppercase tracking-wider">{t('header_debt')}</span>
                         </div>
-                        <div className="text-2xl font-bold font-mono">{state.debt > 0 ? `₹${state.debt.toLocaleString()}` : t('ui_free')}</div>
+                        <div className="text-2xl font-bold font-mono">{state.debt > 0 ? `₹${state.debt.toLocaleString('en-IN')}` : t('ui_free')}</div>
                     </div>
                 </div>
             </div>

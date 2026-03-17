@@ -68,7 +68,7 @@ export const MarketScreen = () => {
                         </div>
                         <div>
                             <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider block mb-1">{t('ui_base_price')}</span>
-                            <span className="font-bold text-lg text-green-700 font-mono">₹{basePrice.toLocaleString()}/{t('ui_per_unit')}</span>
+                            <span className="font-bold text-lg text-green-700 font-mono">₹{basePrice.toLocaleString('en-IN')}/{t('ui_per_unit')}</span>
                         </div>
                     </div>
                     
@@ -121,16 +121,16 @@ export const MarketScreen = () => {
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-sm">
                                             <span className="text-gray-600 font-medium">{t('ui_est_gross')}</span>
-                                            <span className="font-bold text-gray-900 font-mono">₹{estGross.toLocaleString()}</span>
+                                            <span className="font-bold text-gray-900 font-mono">₹{estGross.toLocaleString('en-IN')}</span>
                                         </div>
                                         <div className="flex justify-between text-sm pb-2 border-b border-gray-200">
                                             <span className="text-red-500 font-medium">{t('ui_transport_cost')}</span>
-                                            <span className="text-red-600 font-bold font-mono">- ₹{totalTransport.toLocaleString()}</span>
+                                            <span className="text-red-600 font-bold font-mono">- ₹{totalTransport.toLocaleString('en-IN')}</span>
                                         </div>
                                         <div className="flex justify-between items-center pt-1">
                                             <span className="text-gray-700 font-bold">{t('ui_est_net')}</span>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-green-600 font-bold text-lg font-mono">₹{estNet.toLocaleString()}</span>
+                                                <span className="text-green-600 font-bold text-lg font-mono">₹{estNet.toLocaleString('en-IN')}</span>
                                                 <ArrowRight className="w-5 h-5 text-green-600" />
                                             </div>
                                         </div>

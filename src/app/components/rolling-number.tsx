@@ -16,7 +16,7 @@ export const RollingNumber = ({ value, prefix = '', suffix = '' }: RollingNumber
     const end = value;
     
     if (start === end) {
-        if (spanRef.current) spanRef.current.innerText = `${prefix}${end.toLocaleString()}${suffix}`;
+        if (spanRef.current) spanRef.current.innerText = `${prefix}${end.toLocaleString('en-IN')}${suffix}`;
         return;
     }
 
@@ -33,14 +33,14 @@ export const RollingNumber = ({ value, prefix = '', suffix = '' }: RollingNumber
       
       // 2. DIRECT DOM MANIPULATION: This is lightning fast and skips React's render cycle!
       if (spanRef.current) {
-         spanRef.current.innerText = `${prefix}${current.toLocaleString()}${suffix}`;
+         spanRef.current.innerText = `${prefix}${current.toLocaleString('en-IN')}${suffix}`;
       }
 
       if (progress < 1) {
         animationFrameId = requestAnimationFrame(animate);
       } else {
         if (spanRef.current) {
-           spanRef.current.innerText = `${prefix}${end.toLocaleString()}${suffix}`;
+           spanRef.current.innerText = `${prefix}${end.toLocaleString('en-IN')}${suffix}`;
         }
         prevValue.current = end;
       }
@@ -54,5 +54,5 @@ export const RollingNumber = ({ value, prefix = '', suffix = '' }: RollingNumber
   }, [value, prefix, suffix]);
 
   // 3. Render once, let the useEffect handle the text changing
-  return <span ref={spanRef} className="tabular-nums">{prefix}{prevValue.current.toLocaleString()}{suffix}</span>;
+  return <span ref={spanRef} className="tabular-nums">{prefix}{prevValue.current.toLocaleString('en-IN')}{suffix}</span>;
 };

@@ -56,7 +56,7 @@ export const ShopScreen = () => {
 
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
                 <div className="text-xs font-semibold text-teal-100 uppercase tracking-wider mb-1">{t('shop_avail_sav')}</div>
-                <div className="text-3xl font-bold font-mono">₹{state.savings.toLocaleString()}</div>
+                <div className="text-3xl font-bold font-mono">₹{state.savings.toLocaleString('en-IN')}</div>
             </div>
           </div>
         </div>
@@ -81,16 +81,16 @@ export const ShopScreen = () => {
                     <div className="flex justify-between items-center mb-4">
                         <div>
                             <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">{t('shop_total_cost')}</div>
-                            <div className="text-xl font-bold text-gray-900 font-mono">₹{LAND_PRICE_PER_ACRE.toLocaleString()}</div>
+                            <div className="text-xl font-bold text-gray-900 font-mono">₹{LAND_PRICE_PER_ACRE.toLocaleString('en-IN')}</div>
                         </div>
                         <div className="text-right">
                             <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">{t('shop_down_pay')}</div>
-                            <div className="text-xl font-bold text-orange-600 font-mono">₹{downPayment.toLocaleString()}</div>
+                            <div className="text-xl font-bold text-orange-600 font-mono">₹{downPayment.toLocaleString('en-IN')}</div>
                         </div>
                     </div>
                     {hasExistingDebt && (
                         <div className="text-xs text-red-600 bg-red-50 p-3 rounded-lg mb-3 font-bold border border-red-100">
-                            {t('plan_debt_notice', { val: (state.debt + (state.landLoan?.principal || 0)).toLocaleString() })}
+                            {t('plan_debt_notice', { val: (state.debt + (state.landLoan?.principal || 0)).toLocaleString('en-IN') })}
                         </div>
                     )}
                     <button 
@@ -103,7 +103,7 @@ export const ShopScreen = () => {
                         }`}
                     >
                         <MapPin className="w-5 h-5" />
-                        {canAffordUpfront ? t('shop_buy_financed') : t('goals_need_more', { val: (downPayment - state.savings).toLocaleString() })}
+                        {canAffordUpfront ? t('shop_buy_financed') : t('goals_need_more', { val: (downPayment - state.savings).toLocaleString('en-IN') })}
                     </button>
                 </div>
             </div>
@@ -150,7 +150,7 @@ export const ShopScreen = () => {
                             {asset.maintenanceCost > 0 && (
                                 <div className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 px-2.5 py-1 rounded-lg border border-orange-200 text-xs font-bold">
                                     <Wrench className="w-3.5 h-3.5" />
-                                    {t('ui_maintenance')}: ₹{asset.maintenanceCost.toLocaleString()} / {t('season')}
+                                    {t('ui_maintenance')}: ₹{asset.maintenanceCost.toLocaleString('en-IN')} / {t('season')}
                                 </div>
                             )}
                         </div>
@@ -163,7 +163,7 @@ export const ShopScreen = () => {
                                     </div>
                                 )}
                                 {!isOwned && (
-                                    <div className="text-xl font-bold font-mono text-gray-900">₹{displayCost.toLocaleString()}</div>
+                                    <div className="text-xl font-bold font-mono text-gray-900">₹{displayCost.toLocaleString('en-IN')}</div>
                                 )}
                             </div>
                             
@@ -205,10 +205,10 @@ export const ShopScreen = () => {
                         >
                             <div>
                                 <div className="font-bold text-orange-900">{t('shop_finance_opt') || 'Finance (20% Down)'}</div>
-                                <div className="text-xs text-orange-700">₹{loanAmount.toLocaleString()} {t('shop_added_loan') || 'added to loan'}</div>
+                                <div className="text-xs text-orange-700">₹{loanAmount.toLocaleString('en-IN')} {t('shop_added_loan') || 'added to loan'}</div>
                             </div>
                             <div className="font-mono font-bold text-orange-700 text-lg group-hover:scale-105 transition-transform">
-                                ₹{downPayment.toLocaleString()}
+                                ₹{downPayment.toLocaleString('en-IN')}
                             </div>
                         </button>
 
@@ -231,7 +231,7 @@ export const ShopScreen = () => {
                                 </div>
                             </div>
                             <div className={`font-mono font-bold text-lg ${canAffordFull ? 'text-green-700 group-hover:scale-105 transition-transform' : 'text-gray-400'}`}>
-                                ₹{LAND_PRICE_PER_ACRE.toLocaleString()}
+                                ₹{LAND_PRICE_PER_ACRE.toLocaleString('en-IN')}
                             </div>
                         </button>
                     </div>

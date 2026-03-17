@@ -12,7 +12,7 @@ export const AdvisorBot = () => {
     
     let translatedTip = t(tip.key);
     if (tip.val !== undefined) {
-        translatedTip = translatedTip.replace('{val}', tip.val.toLocaleString());
+        translatedTip = translatedTip.replace('{val}', tip.val.toLocaleString('en-IN'));
     }
 
     return (

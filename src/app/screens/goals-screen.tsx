@@ -55,7 +55,7 @@ export const GoalsScreen = () => {
 
                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
                     <div className="text-xs font-semibold text-orange-100 uppercase tracking-wider mb-1">{t('goals_avail_savings')}</div>
-                    <div className="text-3xl font-bold font-mono">₹{state.savings.toLocaleString()}</div>
+                    <div className="text-3xl font-bold font-mono">₹{state.savings.toLocaleString('en-IN')}</div>
                 </div>
               </div>
             </div>
@@ -115,14 +115,14 @@ export const GoalsScreen = () => {
                                 <div className="bg-gray-50 rounded-xl p-4 mb-4">
                                     <div className="flex justify-between items-center">
                                         <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{t('goal_target')}</span>
-                                        <span className="text-2xl font-bold text-gray-900 font-mono">₹{goal.targetAmount.toLocaleString()}</span>
+                                        <span className="text-2xl font-bold text-gray-900 font-mono">₹{goal.targetAmount.toLocaleString('en-IN')}</span>
                                     </div>
                                 </div>
 
                                 {!isAchieved && (
                                     <div className="mb-4">
                                         <div className="flex justify-between text-sm font-bold text-gray-600 mb-2">
-                                            <span>₹{state.savings.toLocaleString()}</span>
+                                            <span>₹{state.savings.toLocaleString('en-IN')}</span>
                                             <span>{progress.toFixed(0)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -139,7 +139,7 @@ export const GoalsScreen = () => {
                                           canAfford ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg hover:from-green-700 hover:to-emerald-700 active:scale-95' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                         }`}
                                     >
-                                        {canAfford ? (<><CheckCircle className="w-5 h-5" />{t('goals_pay_achieve')}</>) : (<><Lock className="w-5 h-5" />{t('goals_need_more', { val: (goal.targetAmount - state.savings).toLocaleString() })}</>)}
+                                        {canAfford ? (<><CheckCircle className="w-5 h-5" />{t('goals_pay_achieve')}</>) : (<><Lock className="w-5 h-5" />{t('goals_need_more', { val: (goal.targetAmount - state.savings).toLocaleString('en-IN') })}</>)}
                                     </button>
                                 )}
                                 
@@ -161,7 +161,7 @@ export const GoalsScreen = () => {
                         </div>
                         <h3 className="text-xl font-bold text-center text-gray-900 mb-2">{t('goals_achieve_q')}</h3>
                         <p className="text-center text-gray-600 mb-6">
-                            {t('goals_confirm_purchase', { cost: confirmData.goal.targetAmount.toLocaleString(), name: t(confirmData.goal.nameKey) })}
+                            {t('goals_confirm_purchase', { cost: confirmData.goal.targetAmount.toLocaleString('en-IN'), name: t(confirmData.goal.nameKey) })}
                         </p>
                         <div className="flex gap-3">
                             <button onClick={() => setConfirmData(null)} className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all">{t('ui_cancel')}</button>
