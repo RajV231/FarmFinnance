@@ -77,6 +77,15 @@ krishiniti/
 ```
 
 ---
+## 📱 Play the Game (Android Download)
+
+Want to skip the setup and just play the game? You can download the compiled Android APK directly to your phone.
+
+[![Download APK](https://img.shields.io/badge/Download_APK-Ready_to_Play-2ea44f?style=for-the-badge&logo=android)](PASTE_YOUR_LINK_HERE)
+
+**Installation Note for Judges:** Since this is a prototype not hosted on the Google Play Store, your phone will ask for permission to "Install from unknown sources." You can safely allow this to test the KrishiNiti simulator.
+
+---
 
 
 ## 🚀 Installation & Local Development
