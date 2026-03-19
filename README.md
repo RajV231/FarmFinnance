@@ -1,179 +1,127 @@
-# KrishiNiti Simulator 🌱
+# KrishiNiti 🌾 | NCFE-Innovate4FinLit Challenge
 
-An interactive agricultural farming simulation game built with React, TypeScript, and Vite. Experience the journey of managing a farm, making strategic decisions, and learning about agricultural practices.
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Capacitor](https://img.shields.io/badge/Capacitor-119EFF?style=for-the-badge&logo=capacitor&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)
 
-Built as a prototype for a financial literacy hackathon, KrishiNiti bridges the gap between theoretical knowledge and real-world behavior.
-
----
-
-## 🎯 The Problem
-Farmers face unique financial challenges: managing seasonal cash flows, saving for lean periods, navigating informal credit traps, and lacking preparedness for environmental or market shocks. Limited familiarity with formal banking and insurance often leaves them vulnerable to debt spirals.
-
-## 💡 Our Solution: Behavior Over Theory
-KrishiNiti moves away from boring, text-heavy quizzes. Instead, it utilizes **Simulation & Decision-Based Mechanics**. Players must actively manage their farm, where every choice has meaningful in-game consequences:
-* **Debt Spirals vs. Credit Scores:** Borrowing from a local moneylender provides quick cash but traps the player in high-interest debt. Using formal Bank loans (Kisan Credit Card) improves their credit score and unlocks better rates.
-* **Risk Protection:** Players experience random events (droughts, pest attacks, market crashes). If they previously invested in Crop Insurance (PMFBY) or protective assets (Drip Irrigation), they mitigate the financial damage.
-* **The Passbook Ledger:** Every action is recorded in a realistic transaction history, teaching cash-flow management visually.
+**Track:** The Farmers  
+**Developer:** Rajvardhan V Wakharade
 
 ---
 
-## 🏆 Hackathon Alignment (Functional Constraints)
+## 🎯 The Problem & Our Solution
+Farmers face complex financial literacy challenges: managing irregular seasonal incomes, coping with climate uncertainty, lacking savings discipline, and relying on informal credit. 
 
-### 1. The Rule of Three (Financial Themes Integrated)
-KrishiNiti heavily integrates more than three core financial themes:
-- **Savings & Investments:** Players manage liquid savings and can lock money into Fixed Deposits (FDs) or Digital Gold to hedge against inflation.
-- **Insurance:** Players must decide whether to pay premiums for PMFBY to protect against weather/market shocks.
-- **Fraud Prevention:** Random scenario events test the player's awareness of OTP scams and digital financial fraud.
-- **Debt Management:** Teaches the danger of compound interest from informal lenders vs. responsible use of formal credit.
+**KrishiNiti** is a hybrid mobile financial simulation game designed to build real-world financial capability. By simulating a 10-season agricultural cycle, players develop critical budgeting skills, savings discipline, credit awareness, and risk management behaviors.
 
-### 2. Rural-Ready Technology
-- **Offline Capable:** Built as a Progressive Web App (PWA) and wrapped natively using Capacitor, the game runs completely offline after the initial download, requiring zero bandwidth.
-- **Voice & Visuals over Text:** - **Text-to-Speech (TTS):** Critical events and quizzes feature audio readouts to support users with low literacy.
-  - **Dynamic 2.5D Visualizer:** The farm visually changes based on the player's land size, asset purchases (tractors, greenhouses), and weather events, relying on visual cues rather than text.
-- **Multilingual:** Fully localized in English, Hindi, Marathi, Telugu, and Tamil.
+## 🌱 How KrishiNiti Solves the Problem:
+* **Managing Irregular Incomes:** The 10-season loop forces players to budget massive upfront planting costs and survive until the lump-sum harvest payout.
+* **Coping with Uncertainty:** A dynamic event engine (droughts, pests) teaches risk protection. Players learn that buying Crop Insurance (PMFBY) or investing in assets (Solar Pumps) mitigates financial shocks.
+* **Savings Discipline:** Replaces reliance on cash by introducing a virtual Bank with Fixed Deposits (FDs), Gold investments, and a "Financial Goals" tracker.
+* **Responsible Use of Credit:** Introduces a live, gamified **Credit Score (300-900)**. Players learn the difference between structured Land EMIs and high-interest crop loans, and face consequences for defaulting.
+* **Building Stability:** Success isn't just measured in cash, but via a quantifiable **Resilience Score** evaluating savings discipline, risk preparedness, and debt stability.
 
-## Features
+---
 
-- 🌾 **Farm Management**: Set up and manage your virtual farm
-- 📊 **Season Planning**: Plan your crops and resources for each season
-- 🏪 **Shop System**: Purchase seeds, equipment, and supplies
-- 🏦 **Banking & Loans**: Manage your finances and take loans
-- 🎯 **Goals & Schemes**: Complete objectives and explore government schemes
-- 📈 **Market Trading**: Sell your produce at market prices
-- ⚡ **Random Events**: Handle unexpected challenges throughout the game
-- 🌍 **Multi-language Support**: Play in your preferred language
-- 📱 **Mobile Ready**: Built with Capacitor for Android deployment
+## ✨ Core Features
 
-## Tech Stack
+### 🌍 Accessibility & Localization
+* **Multilingual UI:** Fully playable in English, Hindi, Marathi, Telugu, and Tamil.
+* **Native Text-to-Speech (TTS):** Integrated Capacitor native TTS engine allows farmers with lower literacy to listen to events and advisory tips via an ever-present speaker button.
 
-- **Frontend**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **Mobile**: Capacitor (Android)
-- **PWA**: Vite Plugin PWA
+### 🎮 Gameplay Mechanics
+* **Dynamic Economy:** Crop prices fluctuate, and yields vary based on weather, player wellbeing, and market choices (Local Mandi vs. e-NAM).
+* **Asset Management:** Purchase equipment to lower operating costs, or take out a mortgage to expand land acreage.
+* **Real Government Schemes:** Players can apply for real-world subsidies including PM-KISAN, PMFBY, MISS, Soil Health Card, and PM-KUSUM.
+* **Real-time Farm Visualizer:** A dynamic graphical display showing the current visual condition of the field.
+* **Comprehensive Ledger:** A detailed Passbook tracking every rupee earned and spent, alongside a historical Harvest Report.
 
-## Prerequisites
+---
 
-- Node.js (v18 or higher recommended)
-- npm or yarn
+## 🛠 Tech Stack
 
-## Installation
+Built as a Progressive Web App (PWA) and compiled into a native Android application.
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd krishiniti-simulator
-   ```
+* **Frontend:** React 18, TypeScript, Vite
+* **Styling:** Tailwind CSS, Lucide React Icons
+* **Mobile Deployment:** Ionic Capacitor (`@capacitor/android`)
+* **Hardware Integrations:** `@capacitor-community/text-to-speech`, Capacitor App Plugin (Hardware Back-Button routing)
+* **PWA Support:** Vite Plugin PWA
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+---
 
-## Development
+## 📂 Project Architecture
 
-Start the development server:
+A clean, modular React architecture separated into UI, Game Logic, and Data.
 
-```bash
-npm run dev
+```text
+krishiniti/
+├── android/                # Native Android Capacitor source code
+├── public/                 # Static assets, PWA icons, & manifests
+├── src/
+│   ├── app/
+│   │   ├── components/     # Reusable UI (AdvisorBot, FarmVisualizer, TTS Button)
+│   │   ├── context/        # Global State (GameReducer, LanguageContext)
+│   │   ├── data/           # Static game scenarios, crop data, events
+│   │   ├── engine/         # Core logic (Education, Events, Market engines)
+│   │   ├── hooks/          # Custom hooks (e.g., Native TTS fallback hook)
+│   │   ├── screens/        # Main game views (Dashboard, Bank, Harvest, etc.)
+│   │   └── utils/          # Audio FX engine, Storage, Financial Calculations
+│   ├── App.tsx             # Main Router & Native Hardware Back-button handler
+│   └── main.tsx            # React entry point
+├── capacitor.config.ts     # Mobile deployment & plugin config
+├── tailwind.config.ts      # UI styling system
+└── vite.config.ts          # Build tool & PWA config
 ```
 
-The app will be available at `http://localhost:5173` (or the next available port).
+---
 
-## Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server with hot module replacement |
-| `npm run build` | Build the production-ready application |
-| `npm run preview` | Preview the production build locally |
-| `npm run lint` | Run ESLint to check code quality |
+## 🚀 Installation & Local Development
 
-## Building for Production
+Make sure you have [Node.js](https://nodejs.org/) installed on your machine. For Android deployment, you will need [Android Studio](https://developer.android.com/studio).
 
-Create a production build:
-
+### 1. Web Development Server
 ```bash
+# Clone the repository
+git clone [your-repo-link]
+cd krishiniti
+
+# Install dependencies
+npm install
+
+# Start the local development server
+npm run dev
+```
+The app will be available at `http://localhost:5173`.
+
+### 2. Building for Production
+```bash
+# Compile TypeScript and build for production
 npm run build
 ```
 
-The built files will be in the `dist/` directory.
+### 3. Android Native Deployment
+This project uses Capacitor to bridge the React web app to native Android.
+```bash
+# 1. Ensure you have a fresh web build
+npm run build
 
-## Android Deployment
+# 2. Sync the web assets and plugins to the Android folder
+npx cap sync android
 
-This project uses Capacitor for Android deployment:
-
-1. Build the web app:
-   ```bash
-   npm run build
-   ```
-
-2. Sync with Capacitor:
-   ```bash
-   npx cap sync android
-   ```
-
-3. Open in Android Studio:
-   ```bash
-   npx cap open android
-   ```
-
-4. Build and deploy from Android Studio
-
-## Project Structure
-
+# 3. Open Android Studio to compile the final .apk
+npx cap open android
 ```
-krishiniti-simulator/
-├── src/
-│   ├── app/
-│   │   ├── context/      # React context providers (Game, Language)
-│   │   └── screens/      # Game screen components
-│   ├── assets/           # Static assets (images, etc.)
-│   ├── styles/           # Custom styles
-│   ├── App.tsx           # Main app component
-│   └── main.tsx          # Entry point
-├── public/               # Public static files
-├── capacitor.config.ts   # Capacitor configuration
-├── tailwind.config.ts    # Tailwind CSS configuration
-├── vite.config.ts        # Vite configuration
-└── package.json
-```
-
-## Game Phases
-
-The game progresses through different phases:
-
-1. **Splash Screen** - Welcome screen with logo
-2. **Language Selection** - Choose your preferred language
-3. **Goal Selection** - Select your farming goals
-4. **Farm Setup** - Configure your farm settings
-5. **Dashboard** - Main game interface
-6. **Season Planning** - Plan your crops
-7. **Events** - Handle random events
-8. **Harvest** - Collect your produce
-9. **Market** - Sell your crops
-10. **Summary** - View game results
-
-## Configuration
-
-### Tailwind CSS
-Customize the design system in `tailwind.config.ts`.
-
-### Capacitor
-Update app metadata and plugins in `capacitor.config.ts`.
-
-### TypeScript
-TypeScript configuration is split across multiple files:
-- `tsconfig.json` - Base configuration
-- `tsconfig.app.json` - Application specific config
-- `tsconfig.node.json` - Node/Vite specific config
-
-## License
-
-This project is private and proprietary.
-
 
 ---
 
-Built with ❤️ by RAJVARDHAN.V.WAKHARADE for financial empowerment and rural resilience.
+## 📜 License & Credits
+
+This project was developed exclusively for the **NCFE-Innovate4FinLit Challenge**. 
+
+Built with ❤️ by **Rajvardhan V. Wakharade** for financial empowerment and rural resilience.
+
+***
