@@ -53,11 +53,11 @@ Farmers face complex financial literacy challenges: managing irregular seasonal 
 
 Built as a Progressive Web App (PWA) and compiled into a native Android application.
 
-* **Frontend:** React 18, TypeScript, Vite
-* **Styling:** Tailwind CSS, Lucide React Icons
-* **Mobile Deployment:** Ionic Capacitor (`@capacitor/android`)
-* **Hardware Integrations:** `@capacitor-community/text-to-speech`, Capacitor App Plugin (Hardware Back-Button routing)
-* **PWA Support:** Vite Plugin PWA
+* **Frontend:** React 18.2.0, TypeScript 5.2.2, Vite 7.3.1
+* **Styling:** Tailwind CSS 3.4.19, Lucide React 0.344.0
+* **Mobile Deployment:** Ionic Capacitor (`@capacitor/android`) 8.2.0
+* **Hardware Integrations:** `@capacitor-community/text-to-speech` 8.0.0, Capacitor App Plugin (Hardware Back-Button routing)
+* **PWA Support:** Vite Plugin PWA 1.2.0
 
 ---
 
