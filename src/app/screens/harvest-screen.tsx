@@ -96,30 +96,28 @@ export const HarvestScreen = () => {
 
             {/* Financial Summary Cards */}
             <div className="grid grid-cols-2 gap-4 mb-6">
-    {/* NEW SAVINGS BLOCK */}
-    {/* Added min-w-0 to prevent grid blowout */}
-    <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-3xl text-white shadow-lg min-w-0">
-        <div className="text-xs font-bold uppercase tracking-wider mb-1 opacity-90 truncate">
-            {t('new_savings') || 'New Savings'}
-        </div>
-        {/* Added truncate and responsive text sizing */}
-        <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono truncate" title={`₹${state.savings.toLocaleString('en-IN')}`}>
-            ₹{state.savings.toLocaleString('en-IN')}
-        </div>
-    </div>
+                {/* NEW SAVINGS BLOCK */}
+                <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-3xl text-white shadow-lg min-w-0">
+                    <div className="text-xs font-bold uppercase tracking-wider mb-1 opacity-90 truncate">
+                        {/* FIX: Check if translation failed and return proper English fallback */}
+                        {t('new_savings') === 'new_savings' ? 'New Savings' : t('new_savings')}
+                    </div>
+                    <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono truncate" title={`₹${state.savings.toLocaleString('en-IN')}`}>
+                        ₹{state.savings.toLocaleString('en-IN')}
+                    </div>
+                </div>
 
-    {/* CURRENT DEBT BLOCK */}
-    {/* Added min-w-0 to prevent grid blowout */}
-    <div className="bg-gradient-to-br from-red-500 to-rose-600 p-4 rounded-3xl text-white shadow-lg min-w-0">
-        <div className="text-xs font-bold uppercase tracking-wider mb-1 opacity-90 truncate">
-            {t('current_debt') || 'Current Debt'}
-        </div>
-        {/* Added truncate and responsive text sizing */}
-        <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono truncate" title={`₹${state.debt.toLocaleString('en-IN')}`}>
-            ₹{state.debt.toLocaleString('en-IN')}
-        </div>
-    </div>
-</div>
+                {/* CURRENT DEBT BLOCK */}
+                <div className="bg-gradient-to-br from-red-500 to-rose-600 p-4 rounded-3xl text-white shadow-lg min-w-0">
+                    <div className="text-xs font-bold uppercase tracking-wider mb-1 opacity-90 truncate">
+                        {/* FIX: Check if translation failed and return proper English fallback */}
+                        {t('current_debt') === 'current_debt' ? 'Current Debt' : t('current_debt')}
+                    </div>
+                    <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono truncate" title={`₹${state.debt.toLocaleString('en-IN')}`}>
+                        ₹{state.debt.toLocaleString('en-IN')}
+                    </div>
+                </div>
+            </div>
 
             {/* Debt Repayment Section */}
             {totalDebt > 0 ? (
