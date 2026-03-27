@@ -14,7 +14,7 @@
 
 Want to skip the setup and just play the game? You can download the compiled Android APK directly to your phone.
 
-[![Download APK](https://img.shields.io/badge/Download_APK-Ready_to_Play-2ea44f?style=for-the-badge&logo=android)](https://github.com/RajV231/FarmFinnance/releases/download/v1.2.0/v3_1.2.0_KN.apk)
+[![Download APK](https://img.shields.io/badge/Download_APK-Ready_to_Play-2ea44f?style=for-the-badge&logo=android)](https://github.com/RajV231/FarmFinnance/releases/download/Final-v1.2.0/KN_Final.apk)
 
 **Installation Note for Judges:** Since this is a prototype not hosted on the Google Play Store, your phone will ask for permission to "Install from unknown sources." You can safely allow this to test the KrishiNiti simulator.
 
